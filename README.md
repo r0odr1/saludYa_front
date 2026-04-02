@@ -45,7 +45,7 @@ Proveer una interfaz moderna para la gestión de servicios de fisioterapia, faci
 
 Desarrollado por:
 
-[Rodrigo Bonilla Torres](https://github.com/r0odr1)
-[Gueldy Yulied Pardo Pardo](https://github.com/yuli381)
-[Pablo]()
-[Cesar]()
+- [Rodrigo Bonilla Torres](https://github.com/r0odr1)
+- [Gueldy Yulied Pardo Pardo](https://github.com/yuli381)
+- [Cesar Augusto Valencia Moreno](https://github.com/siabag)
+- [Juan Pablo Salazar Achicanoy](https://github.com/Jp1721)
