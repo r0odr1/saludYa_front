@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -27,6 +28,14 @@ export const routes: Routes = [
   {
     path: 'nueva-contrasena',
     loadComponent: () => import('../pages/nueva-contrasena/nueva-contrasena.component').then(m => m.NuevaContrasenaComponent)
+  },
+
+  /** Prfil */
+
+  {
+    path: 'perfil',
+    canActivate: [authGuard],
+    loadComponent: () => import('../pages/perfil/perfil.component').then(m => m.PerfilComponent)
   },
 
   { path: '**', redirectTo: '/login' }
