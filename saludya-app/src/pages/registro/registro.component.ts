@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../app/services/auth.service';
@@ -11,7 +11,7 @@ import { AuthService } from '../../app/services/auth.service';
   templateUrl: './registro.component.html',
   styleUrls: ['./registro.component.scss'],
 })
-export class RegistroComponent {
+export class RegistroComponent implements OnInit {
   datos = { nombre: '', email: '', password: '', telefono: '' };
   confirmarPassword = '';
   error = '';
@@ -21,6 +21,12 @@ export class RegistroComponent {
     private auth: AuthService,
     private router: Router,
   ) {}
+
+  ngOnInit() {
+    if (this.auth.estaLogueado()) {
+      this.auth.redirigirPorRol();
+    }
+  }
 
   onRegistro() {
     if (!this.datos.nombre || !this.datos.email || !this.datos.password) {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../app/services/auth.service';
@@ -11,7 +11,7 @@ import { AuthService } from '../../app/services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   email = '';
   password = '';
   error = '';
@@ -22,6 +22,12 @@ export class LoginComponent {
     private auth: AuthService,
     private router: Router,
   ) {}
+
+  ngOnInit() {
+    if (this.auth.estaLogueado()) {
+      this.auth.redirigirPorRol();
+    }
+  }
 
   onLogin() {
     if (!this.email || !this.password) {
@@ -37,8 +43,10 @@ export class LoginComponent {
         if (res.requiereVerificacion) {
           // Cuenta no verificada, redirigir a verificación
           this.router.navigate(['/verificar-cuenta']);
-        } else {
+        } else if (res.token && res.usuario) {
           this.auth.redirigirPorRol();
+        } else {
+          this.error = 'Respuesta inválida del servidor. Intenta de nuevo.';
         }
       },
       error: (err) => {
