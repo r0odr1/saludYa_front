@@ -29,7 +29,7 @@ export class AuthService {
   private _usuario = signal<Usuario | null>(null);
   private _token = signal<string | null>(null);
 
-  // Email pendiente de verificación para pasar entre pantallas
+  // Correo pendiente de verificación para pasar entre pantallas
   private _emailPendiente = signal<string>('');
 
   usuario = this._usuario.asReadonly();
@@ -58,7 +58,7 @@ export class AuthService {
     }
   }
 
-  // ===== REGISTRO =====
+  /** Registro */
   registro(datos: { nombre: string; email: string; password: string; telefono: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/registro`, datos).pipe(
       tap(res => {
@@ -69,7 +69,7 @@ export class AuthService {
     );
   }
 
-  // ===== VERIFICAR CUENTA =====
+  /** Verificar cuenta */
   verificarCuenta(email: string, codigo: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/verificar-cuenta`, { email, codigo }).pipe(
       tap(res => {
@@ -81,12 +81,12 @@ export class AuthService {
     );
   }
 
-  // ===== REENVIAR CÓDIGO =====
+  /** Reenviar Codigo */
   reenviarCodigo(email: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/reenviar-codigo`, { email });
   }
 
-  // ===== LOGIN =====
+  /** Login */
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
       tap(res => {
@@ -99,7 +99,7 @@ export class AuthService {
     );
   }
 
-  // ===== SOLICITAR RESET DE CONTRASEÑA =====
+  /** Solicitar Reset de Contrasena */
   solicitarReset(email: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/solicitar-reset`, { email }).pipe(
       tap(res => {
@@ -110,17 +110,17 @@ export class AuthService {
     );
   }
 
-  // ===== VERIFICAR CÓDIGO DE RESET =====
+  /** Verificar codigo del reset */
   verificarReset(email: string, codigo: string): Observable<{ mensaje: string; resetToken: string }> {
     return this.http.post<{ mensaje: string; resetToken: string }>(`${this.apiUrl}/verificar-reset`, { email, codigo });
   }
 
-  // ===== NUEVA CONTRASEÑA =====
+  /** Nueva Contrasena */
   nuevaContrasena(resetToken: string, nuevaPassword: string): Observable<{ mensaje: string }> {
     return this.http.post<{ mensaje: string }>(`${this.apiUrl}/nueva-contrasena`, { resetToken, nuevaPassword });
   }
 
-  // ===== PERFIL =====
+  /** Perfil */
   actualizarPerfil(datos: { nombre: string; telefono: string }): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/perfil`, datos).pipe(
       tap(res => {
@@ -138,7 +138,7 @@ export class AuthService {
     return this.http.put<any>(`${this.apiUrl}/cambiar-contrasena`, { contrasenaActual, nuevaContrasena });
   }
 
-  // ===== SESIÓN =====
+  /** Sesion */
   logout() {
     localStorage.removeItem('sy_token');
     localStorage.removeItem('sy_usuario');
