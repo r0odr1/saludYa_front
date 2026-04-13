@@ -1,1 +1,38 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@400;600;700&display=swap');
+
+:root {
+  --color-primary: #0F5132;
+  --color-primary-light: #198754;
+  --color-primary-lighter: #d1e7dd;
+  --color-primary-dark: #0a3622;
+  --color-accent: #E8A838;
+  --color-accent-light: #fcefc7;
+  --color-bg: #F8F6F1;
+  --color-bg-card: #FFFFFF;
+  --color-bg-dark: #1a1a2e;
+  --color-text: #2D2D2D;
+  --color-text-light: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-danger: #DC3545;
+  --color-danger-light: #f8d7da;
+  --color-success: #198754;
+  --color-warning: #FFC107;
+  --color-info: #0DCAF0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 50px;
+  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
