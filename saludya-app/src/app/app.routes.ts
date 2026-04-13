@@ -4,7 +4,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 
-  // ===== AUTH =====
+  /** Autenticacion */
   {
     path: 'login',
     loadComponent: () => import('../pages/login/login.component').then(m => m.LoginComponent)
@@ -30,12 +30,19 @@ export const routes: Routes = [
     loadComponent: () => import('../pages/nueva-contrasena/nueva-contrasena.component').then(m => m.NuevaContrasenaComponent)
   },
 
-  /** Prfil */
+  /** Perfil */
 
   {
     path: 'perfil',
     canActivate: [authGuard],
     loadComponent: () => import('../pages/perfil/perfil.component').then(m => m.PerfilComponent)
+  },
+
+  /** Paciente */
+  {
+    path: 'paciente/dashboard',
+    canActivate: [authGuard],
+    loadComponent: () => import('../pages/paciente/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
 
   { path: '**', redirectTo: '/login' }
