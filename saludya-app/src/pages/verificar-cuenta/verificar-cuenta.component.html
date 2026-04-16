@@ -10,7 +10,7 @@
     <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
     <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
 
-    <!-- Inputs de 6 dígitos -->
+    <!-- Inputs de 6 dígitos con ngModel -->
     <div class="code-inputs">
       <input
         *ngFor="let d of digitos; let i = index"
@@ -18,12 +18,13 @@
         type="text"
         maxlength="1"
         class="code-digit"
-        [value]="digitos[i]"
-        (input)="onDigitInput($event, i)"
+        [(ngModel)]="digitos[i]"
         (keydown)="onKeyDown($event, i)"
-        (paste)="onPaste($event)"
+        (paste)="onPaste($event, i)"
+        (input)="onDigitChange(i)"
         inputmode="numeric"
         autocomplete="off"
+        [disabled]="cargando"
       />
     </div>
 
@@ -37,7 +38,11 @@
 
     <div class="resend-section">
       <p>¿No recibiste el código?</p>
-      <button class="btn btn-ghost" (click)="reenviar()" [disabled]="reenviando || cooldown > 0">
+      <button 
+        class="btn btn-ghost" 
+        (click)="reenviar()" 
+        [disabled]="reenviando || cooldown > 0"
+      >
         {{
           reenviando
             ? 'Enviando...'

@@ -43,99 +43,71 @@ export class VerificarCuentaComponent implements OnInit {
     inputs[index]?.nativeElement.focus();
   }
 
-  private updateInputValues() {
-    const inputs = this.digitInputs.toArray();
-    inputs.forEach((input, i) => {
-      input.nativeElement.value = this.digitos[i] || '';
-    });
-  }
-
-  onDigitInput(event: Event, index: number) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value.replace(/\D/g, ''); // Solo números
-
-    if (!value) {
-      this.digitos[index] = '';
-      input.value = '';
-      return;
+  onDigitChange(index: number) {
+    // Si el usuario escribió un dígito, avanzar al siguiente
+    if (this.digitos[index] && index < 5) {
+      setTimeout(() => this.focusInput(index + 1));
     }
-
-    // Si entran varios caracteres, distribuirlos en los siguientes campos
-    if (value.length > 1) {
-      for (let i = 0; i < Math.min(6 - index, value.length); i++) {
-        this.digitos[index + i] = value[i];
-      }
-      this.updateInputValues();
-      const nextIndex = Math.min(5, index + value.length);
-      setTimeout(() => this.focusInput(nextIndex));
-      return;
+    
+    // Si completó los 6 dígitos
+    if (this.digitos.every(d => d !== '')) {
+      this.verificar();
     }
-
-    this.digitos[index] = value;
-    input.value = value;
   }
 
   onKeyDown(event: KeyboardEvent, index: number) {
-    const input = event.target as HTMLInputElement;
-
+    // Permitir solo números, backspace y flechas
     if (/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-      this.digitos[index] = event.key;
-      input.value = event.key;
       if (index < 5) {
         setTimeout(() => this.focusInput(index + 1));
       }
       return;
     }
 
+    // Manejar Backspace para retroceder al input anterior si está vacío
     if (event.key === 'Backspace') {
-      event.preventDefault();
-      if (this.digitos[index]) {
-        this.digitos[index] = '';
-        input.value = '';
-        return;
-      }
-      if (index > 0) {
-        this.digitos[index - 1] = '';
+      if (!this.digitos[index] && index > 0) {
         setTimeout(() => this.focusInput(index - 1));
       }
       return;
     }
 
+    // Permitir navegación con flechas
     if (event.key === 'ArrowLeft' && index > 0) {
-      event.preventDefault();
       setTimeout(() => this.focusInput(index - 1));
       return;
     }
-
     if (event.key === 'ArrowRight' && index < 5) {
-      event.preventDefault();
       setTimeout(() => this.focusInput(index + 1));
       return;
     }
+
+    // Prevenir entrada de caracteres no numéricos
+    if (!['Backspace', 'ArrowLeft', 'ArrowRight', 'Tab', 'Delete'].includes(event.key)) {
+      event.preventDefault();
+    }
   }
 
-  onPaste(event: ClipboardEvent) {
+  onPaste(event: ClipboardEvent, index: number = 0) {
     event.preventDefault();
-    const paste = event.clipboardData?.getData('text')?.replace(/\D/g, '') || '';
-
+    const paste = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    
     if (paste.length > 0) {
-      // Llenar los inputs con el texto pegado
-      for (let i = 0; i < Math.min(6, paste.length); i++) {
+      // Limpiar array primero
+      this.digitos = ['', '', '', '', '', ''];
+      
+      // Llenar el array desde la posición actual
+      for (let i = 0; i < paste.length && i < 6; i++) {
         this.digitos[i] = paste[i];
       }
-
-      // Actualizar los inputs visualmente
-      setTimeout(() => {
-        const inputs = this.digitInputs.toArray();
-        inputs.forEach((input, i) => {
-          input.nativeElement.value = this.digitos[i];
-        });
-
-        // Enfocar el último input lleno o el siguiente vacío
-        const nextIndex = Math.min(5, paste.length);
-        inputs[nextIndex]?.nativeElement.focus();
-      });
+      
+      // Enfocar el siguiente input vacío
+      const nextIndex = Math.min(5, paste.length);
+      setTimeout(() => this.focusInput(nextIndex));
+      
+      if (this.digitos.every(d => d !== '')) {
+        this.verificar();
+      }
     }
   }
 
@@ -160,7 +132,6 @@ export class VerificarCuentaComponent implements OnInit {
         this.digitos = ['', '', '', '', '', ''];
         setTimeout(() => {
           const inputs = this.digitInputs.toArray();
-          inputs.forEach((input) => (input.nativeElement.value = ''));
           inputs[0]?.nativeElement.focus();
         });
       },
@@ -168,6 +139,8 @@ export class VerificarCuentaComponent implements OnInit {
   }
 
   reenviar() {
+    if (this.cooldown > 0) return;
+    
     this.reenviando = true;
     this.error = '';
 
