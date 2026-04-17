@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, OnInit, QueryList, ViewChildren, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../app/services/auth.service';
@@ -11,7 +11,7 @@ import { AuthService } from '../../app/services/auth.service';
   templateUrl: './verificar-cuenta.component.html',
   styleUrls: ['./verificar-cuenta.component.scss'],
 })
-export class VerificarCuentaComponent implements OnInit {
+export class VerificarCuentaComponent implements OnInit, OnDestroy {
   @ViewChildren('digitInput') digitInputs!: QueryList<ElementRef>;
 
   email = '';
@@ -22,9 +22,17 @@ export class VerificarCuentaComponent implements OnInit {
   reenviando = false;
   cooldown = 0;
 
+  // Pantalla de exito
+  verificado = false;
+  contadorRedireccion = 10;
+  progresoRedireccion = 0;
+  private redireccionInterval: any;
+
   constructor(
     private auth: AuthService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
   ) {}
 
   ngOnInit() {
@@ -60,39 +68,28 @@ export class VerificarCuentaComponent implements OnInit {
       return;
     }
 
-    // Si entran varios caracteres, distribuirlos en los siguientes campos
-    if (value.length > 1) {
-      for (let i = 0; i < Math.min(6 - index, value.length); i++) {
-        this.digitos[index + i] = value[i];
-      }
-      this.updateInputValues();
-      const nextIndex = Math.min(5, index + value.length);
-      setTimeout(() => this.focusInput(nextIndex));
-      return;
+    // Tomar solo el último dígito ingresado
+    const digit = value.slice(-1);
+    this.digitos[index] = digit;
+    input.value = digit;
+
+    // Avanzar al siguiente
+    if (index < 5) {
+      setTimeout(() => this.focusInput(index + 1));
     }
 
-    this.digitos[index] = value;
-    input.value = value;
+    // Auto-verificar al completar
+    if (this.codigoCompleto.length === 6) {
+      setTimeout(() => this.verificar(), 100);
+    }
   }
 
   onKeyDown(event: KeyboardEvent, index: number) {
-    const input = event.target as HTMLInputElement;
-
-    if (/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-      this.digitos[index] = event.key;
-      input.value = event.key;
-      if (index < 5) {
-        setTimeout(() => this.focusInput(index + 1));
-      }
-      return;
-    }
-
     if (event.key === 'Backspace') {
       event.preventDefault();
       if (this.digitos[index]) {
         this.digitos[index] = '';
-        input.value = '';
+        (event.target as HTMLInputElement).value = '';
         return;
       }
       if (index > 0) {
@@ -113,6 +110,15 @@ export class VerificarCuentaComponent implements OnInit {
       setTimeout(() => this.focusInput(index + 1));
       return;
     }
+
+    // Bloquear letras y caracteres especiales
+    if (event.key.length === 1 && !/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
   onPaste(event: ClipboardEvent) {
@@ -149,8 +155,8 @@ export class VerificarCuentaComponent implements OnInit {
     this.auth.verificarCuenta(this.email, this.codigoCompleto).subscribe({
       next: () => {
         this.cargando = false;
-        this.exito = '¡Cuenta verificada!';
-        setTimeout(() => this.auth.redirigirPorRol(), 1000);
+        this.verificado = true;
+        this.iniciarRedireccion();
       },
       error: (err) => {
         this.cargando = false;
@@ -165,6 +171,34 @@ export class VerificarCuentaComponent implements OnInit {
         });
       },
     });
+  }
+
+  private iniciarRedireccion() {
+    this.contadorRedireccion = 10;
+    this.progresoRedireccion = 0;
+
+    this.ngZone.runOutsideAngular(() => {
+      this.redireccionInterval = setInterval(() => {
+        this.ngZone.run(() => {
+          this.contadorRedireccion--;
+          this.progresoRedireccion = ((10 - this.contadorRedireccion) / 10) * 100;
+          this.cdr.markForCheck();
+
+          if (this.contadorRedireccion <= 0) {
+            clearInterval(this.redireccionInterval);
+            this.irAlInicio();
+          }
+        });
+      }, 1000);
+    });
+  }
+
+  irAlInicio() {
+    if (this.redireccionInterval) {
+      clearInterval(this.redireccionInterval);
+    }
+    // Limpiar sesión para que no redirija al dashboard
+    this.auth.logout();
   }
 
   reenviar() {
@@ -190,5 +224,11 @@ export class VerificarCuentaComponent implements OnInit {
         this.error = err.error?.mensaje || 'Error al reenviar código.';
       },
     });
+  }
+
+  ngOnDestroy() {
+    if (this.redireccionInterval) {
+      clearInterval(this.redireccionInterval);
+    }
   }
 }

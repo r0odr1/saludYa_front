@@ -1,53 +1,76 @@
 <div class="verify-page">
-  <div class="verify-card animate-in">
-    <div class="verify-icon">📧</div>
-    <h2>Verifica tu cuenta</h2>
+
+  <!-- PANTALLA DE ÉXITO -->
+  <div class="verify-card animate-in" *ngIf="verificado; else formularioVerificacion">
+    <div class="success-icon">🎉</div>
+    <h2>¡Cuenta verificada!</h2>
     <p class="verify-subtitle">
-      Enviamos un código de 6 dígitos a
-      <strong>{{ email }}</strong>
+      Tu cuenta ha sido activada exitosamente.<br />
+      Ya puedes acceder a todas las funcionalidades de SaludYa.
     </p>
 
-    <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
-    <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
-
-    <!-- Inputs de 6 dígitos -->
-    <div class="code-inputs">
-      <input
-        *ngFor="let d of digitos; let i = index"
-        #digitInput
-        type="text"
-        maxlength="1"
-        class="code-digit"
-        [value]="digitos[i]"
-        (input)="onDigitInput($event, i)"
-        (keydown)="onKeyDown($event, i)"
-        (paste)="onPaste($event)"
-        inputmode="numeric"
-        autocomplete="off"
-      />
+    <div class="success-redirect">
+      <p>Serás redirigido en <strong>{{ contadorRedireccion }}s</strong></p>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width]="progresoRedireccion + '%'"></div>
+      </div>
     </div>
 
-    <button
-      class="btn btn-primary btn-block btn-lg"
-      (click)="verificar()"
-      [disabled]="cargando || codigoCompleto.length !== 6"
-    >
-      {{ cargando ? 'Verificando...' : 'Verificar cuenta' }}
+    <button class="btn btn-primary btn-block btn-lg" (click)="irAlInicio()">
+      Ir al inicio ahora →
     </button>
-
-    <div class="resend-section">
-      <p>¿No recibiste el código?</p>
-      <button class="btn btn-ghost" (click)="reenviar()" [disabled]="reenviando || cooldown > 0">
-        {{
-          reenviando
-            ? 'Enviando...'
-            : cooldown > 0
-              ? 'Reenviar en ' + cooldown + 's'
-              : 'Reenviar código'
-        }}
-      </button>
-    </div>
-
-    <a routerLink="/login" class="back-link">← Volver al inicio de sesión</a>
   </div>
+  <ng-template #formularioVerificacion>
+    <div class="verify-card animate-in">
+      <div class="verify-icon">📧</div>
+      <h2>Verifica tu cuenta</h2>
+      <p class="verify-subtitle">
+        Enviamos un código de 6 dígitos a
+        <strong>{{ email }}</strong>
+      </p>
+
+      <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
+      <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
+
+      <!-- Inputs de 6 dígitos -->
+      <div class="code-inputs">
+        <input
+          *ngFor="let d of digitos; let i = index; trackBy: trackByIndex"
+          #digitInput
+          type="text"
+          maxlength="1"
+          class="code-digit"
+          [value]="digitos[i]"
+          (input)="onDigitInput($event, i)"
+          (keydown)="onKeyDown($event, i)"
+          (paste)="onPaste($event)"
+          inputmode="numeric"
+          autocomplete="off"
+        />
+      </div>
+
+      <button
+        class="btn btn-primary btn-block btn-lg"
+        (click)="verificar()"
+        [disabled]="cargando || codigoCompleto.length !== 6"
+      >
+        {{ cargando ? 'Verificando...' : 'Verificar cuenta' }}
+      </button>
+
+      <div class="resend-section">
+        <p>¿No recibiste el código?</p>
+        <button class="btn btn-ghost" (click)="reenviar()" [disabled]="reenviando || cooldown > 0">
+          {{
+            reenviando
+              ? 'Enviando...'
+              : cooldown > 0
+                ? 'Reenviar en ' + cooldown + 's'
+                : 'Reenviar código'
+          }}
+        </button>
+      </div>
+
+      <a routerLink="/login" class="back-link">← Volver al inicio de sesión</a>
+    </div>
+  </ng-template>
 </div>
