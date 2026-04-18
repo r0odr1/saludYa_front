@@ -33,7 +33,7 @@
       <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
 
       <!-- Inputs de 6 dígitos -->
-      <div class="code-inputs">
+      <div class="code-inputs" [class.shake]="mostrarError">
         <input
           *ngFor="let d of digitos; let i = index; trackBy: trackByIndex"
           #digitInput
