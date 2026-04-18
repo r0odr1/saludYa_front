@@ -21,6 +21,7 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
   cargando = false;
   reenviando = false;
   cooldown = 0;
+  mostrarError = false;
 
   // Pantalla de exito
   verificado = false;
@@ -46,74 +47,24 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
     return this.digitos.join('');
   }
 
-  private focusInput(index: number) {
-    const inputs = this.digitInputs.toArray();
-    inputs[index]?.nativeElement.focus();
-  }
-
-  private updateInputValues() {
-    const inputs = this.digitInputs.toArray();
-    inputs.forEach((input, i) => {
-      input.nativeElement.value = this.digitos[i] || '';
-    });
-  }
-
   onDigitInput(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
-    const value = input.value.replace(/\D/g, ''); // Solo números
-
-    if (!value) {
-      this.digitos[index] = '';
-      input.value = '';
-      return;
+    const value = input.value.replace(/\D/g, '');
+    this.digitos[index] = value;
+    input.value = value;
+    if (value && index < 5) {
+      const inputs = this.digitInputs.toArray();
+      inputs[index + 1]?.nativeElement.focus();
     }
-
-    // Tomar solo el último dígito ingresado
-    const digit = value.slice(-1);
-    this.digitos[index] = digit;
-    input.value = digit;
-
-    // Avanzar al siguiente
-    if (index < 5) {
-      setTimeout(() => this.focusInput(index + 1));
-    }
-
-    // Auto-verificar al completar
     if (this.codigoCompleto.length === 6) {
-      setTimeout(() => this.verificar(), 100);
+      this.verificar();
     }
   }
 
   onKeyDown(event: KeyboardEvent, index: number) {
-    if (event.key === 'Backspace') {
-      event.preventDefault();
-      if (this.digitos[index]) {
-        this.digitos[index] = '';
-        (event.target as HTMLInputElement).value = '';
-        return;
-      }
-      if (index > 0) {
-        this.digitos[index - 1] = '';
-        setTimeout(() => this.focusInput(index - 1));
-      }
-      return;
-    }
-
-    if (event.key === 'ArrowLeft' && index > 0) {
-      event.preventDefault();
-      setTimeout(() => this.focusInput(index - 1));
-      return;
-    }
-
-    if (event.key === 'ArrowRight' && index < 5) {
-      event.preventDefault();
-      setTimeout(() => this.focusInput(index + 1));
-      return;
-    }
-
-    // Bloquear letras y caracteres especiales
-    if (event.key.length === 1 && !/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
+    if (event.key === 'Backspace' && !this.digitos[index] && index > 0) {
+      const inputs = this.digitInputs.toArray();
+      inputs[index - 1]?.nativeElement.focus();
     }
   }
 
@@ -161,14 +112,18 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.cargando = false;
         this.error = err.error?.mensaje || 'Código incorrecto.';
+        this.mostrarError = true;
+        this.cdr.markForCheck();
 
-        // Limpiar inputs en caso de error
-        this.digitos = ['', '', '', '', '', ''];
+        // Limpiar inputs después de la animación
         setTimeout(() => {
+          this.digitos = ['', '', '', '', '', ''];
           const inputs = this.digitInputs.toArray();
           inputs.forEach((input) => (input.nativeElement.value = ''));
           inputs[0]?.nativeElement.focus();
-        });
+          this.mostrarError = false;
+          this.cdr.markForCheck();
+        }, 600);
       },
     });
   }

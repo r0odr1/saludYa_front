@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -20,8 +20,9 @@ export class VerificarResetComponent implements OnInit {
   cargando = false;
   reenviando = false;
   cooldown = 0;
+  mostrarError = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.email = this.auth.emailPendiente();
@@ -104,11 +105,16 @@ export class VerificarResetComponent implements OnInit {
       error: (err) => {
         this.cargando = false;
         this.error = err.error?.mensaje || 'Código incorrecto.';
-        this.digitos = ['', '', '', '', '', ''];
+        this.mostrarError = true;
+        this.cdr.markForCheck();
         setTimeout(() => {
+          this.digitos = ['', '', '', '', '', ''];
           const inputs = this.digitInputs.toArray();
+          inputs.forEach((input) => (input.nativeElement.value = ''));
           inputs[0]?.nativeElement.focus();
-        });
+          this.mostrarError = false;
+          this.cdr.markForCheck();
+        }, 600);
       }
     });
   }
