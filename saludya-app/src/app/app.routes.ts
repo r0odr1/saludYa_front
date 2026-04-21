@@ -7,27 +7,40 @@ export const routes: Routes = [
   /** Autenticacion */
   {
     path: 'login',
-    loadComponent: () => import('../pages/login/login.component').then(m => m.LoginComponent)
+    loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'registro',
-    loadComponent: () => import('../pages/registro/registro.component').then(m => m.RegistroComponent)
+    loadComponent: () =>
+      import('./pages/registro/registro.component').then((m) => m.RegistroComponent),
   },
   {
     path: 'verificar-cuenta',
-    loadComponent: () => import('../pages/verificar-cuenta/verificar-cuenta.component').then(m => m.VerificarCuentaComponent)
+    loadComponent: () =>
+      import('./pages/verificar-cuenta/verificar-cuenta.component').then(
+        (m) => m.VerificarCuentaComponent,
+      ),
   },
   {
     path: 'solicitar-reset',
-    loadComponent: () => import('../pages/solicitar-reset/solicitar-reset.component').then(m => m.SolicitarResetComponent)
+    loadComponent: () =>
+      import('./pages/solicitar-reset/solicitar-reset.component').then(
+        (m) => m.SolicitarResetComponent,
+      ),
   },
   {
     path: 'verificar-reset',
-    loadComponent: () => import('../pages/verificar-reset/verificar-reset.component').then(m => m.VerificarResetComponent)
+    loadComponent: () =>
+      import('./pages/verificar-reset/verificar-reset.component').then(
+        (m) => m.VerificarResetComponent,
+      ),
   },
   {
     path: 'nueva-contrasena',
-    loadComponent: () => import('../pages/nueva-contrasena/nueva-contrasena.component').then(m => m.NuevaContrasenaComponent)
+    loadComponent: () =>
+      import('./pages/nueva-contrasena/nueva-contrasena.component').then(
+        (m) => m.NuevaContrasenaComponent,
+      ),
   },
 
   /** Perfil */
@@ -35,15 +48,16 @@ export const routes: Routes = [
   {
     path: 'perfil',
     canActivate: [authGuard],
-    loadComponent: () => import('../pages/perfil/perfil.component').then(m => m.PerfilComponent)
+    loadComponent: () => import('./pages/perfil/perfil.component').then((m) => m.PerfilComponent),
   },
 
   /** Paciente */
   {
     path: 'paciente/dashboard',
     canActivate: [authGuard],
-    loadComponent: () => import('../pages/paciente/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () =>
+      import('./pages/paciente/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
 
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/login' },
 ];
