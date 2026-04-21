@@ -59,5 +59,12 @@ export const routes: Routes = [
       import('./pages/paciente/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
 
+  /** Administrador */
+  {
+    path: 'admin/dashboard',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/dashboard-admin/dashboard-admin.component').then(m => m.DashboardAdminComponent)
+  },
+
   { path: '**', redirectTo: '/login' },
 ];
