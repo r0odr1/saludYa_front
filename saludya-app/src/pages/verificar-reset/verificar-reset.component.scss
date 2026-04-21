@@ -25,20 +25,20 @@
 
 .verify-card h2 {
   font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: var(--color-primary-dark);
   margin-bottom: 8px;
 }
 
 .verify-subtitle {
   color: var(--color-text-light);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   margin-bottom: 32px;
   line-height: 1.5;
-}
 
-.verify-subtitle strong {
-  color: var(--color-text);
+  strong {
+    color: var(--color-text);
+  }
 }
 
 .code-inputs {
@@ -60,23 +60,23 @@
   color: var(--color-primary-dark);
   transition: var(--transition);
   outline: none;
-}
 
-.code-digit:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(15, 81, 50, 0.15);
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(15, 81, 50, 0.15);
+  }
 }
 
 .resend-section {
   margin-top: 28px;
   padding-top: 20px;
   border-top: 1px solid var(--color-border);
-}
 
-.resend-section p {
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-  margin-bottom: 8px;
+  p {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
 }
 
 .back-link {
@@ -84,10 +84,10 @@
   margin-top: 20px;
   color: var(--color-text-light);
   font-size: 0.85rem;
-}
 
-.back-link:hover {
-  color: var(--color-primary);
+  &:hover {
+    color: var(--color-primary);
+  }
 }
 
 @media (max-width: 480px) {
@@ -115,44 +115,4 @@
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
   20%, 40%, 60%, 80% { transform: translateX(8px); }
-}
-
-/** Pantalla de exito */
-
-.success-icon {
-  font-size: 4rem;
-  margin-bottom: 16px;
-  animation: bounceIn 0.6s ease;
-}
-
-@keyframes bounceIn {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.success-redirect {
-  margin: 28px 0;
-  text-align: center;
-}
-
-.success-redirect p {
-  font-size: 0.88rem;
-  color: var(--color-text-light);
-  margin-bottom: 10px;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 6px;
-  background: var(--color-border);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 3px;
-  transition: width 1s linear;
 }

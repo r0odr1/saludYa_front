@@ -1,10 +1,12 @@
 <div class="verify-page">
-  <div class="verify-card animate-in">
-    <div class="verify-icon">📧</div>
-    <h2>Verifica tu cuenta</h2>
+
+  <!-- PANTALLA DE ÉXITO -->
+  <div class="verify-card animate-in" *ngIf="verificado; else formularioVerificacion">
+    <div class="success-icon">🎉</div>
+    <h2>¡Cuenta verificada!</h2>
     <p class="verify-subtitle">
-      Enviamos un código de 6 dígitos a
-      <strong>{{ email }}</strong>
+      Tu cuenta ha sido activada exitosamente.<br />
+      Ya puedes acceder a todas las funcionalidades de SaludYa.
     </p>
 
     <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
@@ -28,12 +30,8 @@
       />
     </div>
 
-    <button
-      class="btn btn-primary btn-block btn-lg"
-      (click)="verificar()"
-      [disabled]="cargando || codigoCompleto.length !== 6"
-    >
-      {{ cargando ? 'Verificando...' : 'Verificar cuenta' }}
+    <button class="btn btn-primary btn-block btn-lg" (click)="irAlInicio()">
+      Ir al inicio ahora →
     </button>
 
     <div class="resend-section">

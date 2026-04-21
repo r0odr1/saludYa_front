@@ -1,0 +1,103 @@
+.reset-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  padding: 20px;
+}
+
+.reset-card {
+  max-width: 420px;
+  width: 100%;
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+
+.reset-icon,
+.success-icon {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+}
+
+.reset-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--color-primary-dark);
+  margin-bottom: 8px;
+}
+
+.reset-subtitle {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.password-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+  text-align: left;
+  padding: 14px 16px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.rule {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  transition: var(--transition);
+
+  &.valid {
+    color: var(--color-success);
+  }
+}
+
+.success-redirect {
+  margin-bottom: 28px;
+  padding: 16px 0;
+
+  p {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+
+    strong {
+      color: var(--color-text);
+      font-weight: 700;
+    }
+  }
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-success);
+  transition: width 1s linear;
+}
+
+@media (max-width: 480px) {
+  .reset-card {
+    padding: 32px 20px;
+  }
+}

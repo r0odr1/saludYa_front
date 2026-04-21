@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -8,87 +8,8 @@ import { AuthService } from '../../app/services/auth.service';
   selector: 'app-verificar-reset',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  template: `
-    <div class="verify-page">
-      <div class="verify-card animate-in">
-        <div class="verify-icon">🔐</div>
-        <h2>Código de restablecimiento</h2>
-        <p class="verify-subtitle">
-          Ingresa el código de 6 dígitos que enviamos a
-          <strong>{{ email }}</strong>
-        </p>
-
-        <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
-
-        <div class="code-inputs">
-          <input
-            *ngFor="let d of digitos; let i = index"
-            #digitInput
-            type="text"
-            maxlength="1"
-            class="code-digit"
-            [value]="digitos[i]"
-            (input)="onDigitInput($event, i)"
-            (keydown)="onKeyDown($event, i)"
-            (paste)="onPaste($event)"
-            inputmode="numeric"
-          >
-        </div>
-
-        <button
-          class="btn btn-primary btn-block btn-lg"
-          (click)="verificar()"
-          [disabled]="cargando || codigoCompleto.length !== 6"
-        >
-          {{ cargando ? 'Verificando...' : 'Verificar código' }}
-        </button>
-
-        <div class="resend-section">
-          <p>¿No recibiste el código?</p>
-          <button class="btn btn-ghost" (click)="reenviar()" [disabled]="reenviando || cooldown > 0">
-            {{ reenviando ? 'Enviando...' : cooldown > 0 ? 'Reenviar en ' + cooldown + 's' : 'Reenviar código' }}
-          </button>
-        </div>
-
-        <a routerLink="/login" class="back-link">← Volver al inicio de sesión</a>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .verify-page {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      background: var(--color-bg); padding: 20px;
-    }
-    .verify-card {
-      max-width: 440px; width: 100%; background: white; border-radius: var(--radius-lg);
-      padding: 48px 40px; text-align: center; box-shadow: var(--shadow-md);
-      border: 1px solid var(--color-border);
-    }
-    .verify-icon { font-size: 3.5rem; margin-bottom: 16px; }
-    .verify-card h2 {
-      font-family: var(--font-display); font-size: 1.6rem;
-      color: var(--color-primary-dark); margin-bottom: 8px;
-    }
-    .verify-subtitle { color: var(--color-text-light); font-size: 0.9rem; margin-bottom: 32px; line-height: 1.5; }
-    .verify-subtitle strong { color: var(--color-text); }
-    .code-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 28px; }
-    .code-digit {
-      width: 52px; height: 60px; border: 2px solid var(--color-border);
-      border-radius: var(--radius-sm); text-align: center;
-      font-size: 1.6rem; font-weight: 700; font-family: var(--font-body);
-      color: var(--color-primary-dark); transition: var(--transition); outline: none;
-    }
-    .code-digit:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(15, 81, 50, 0.15); }
-    .resend-section { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--color-border); }
-    .resend-section p { color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 8px; }
-    .back-link { display: inline-block; margin-top: 20px; color: var(--color-text-light); font-size: 0.85rem; }
-    .back-link:hover { color: var(--color-primary); }
-    @media (max-width: 480px) {
-      .verify-card { padding: 32px 20px; }
-      .code-digit { width: 44px; height: 52px; font-size: 1.3rem; }
-      .code-inputs { gap: 6px; }
-    }
-  `]
+  templateUrl: './verificar-reset.component.html',
+  styleUrls: ['./verificar-reset.component.scss'],
 })
 export class VerificarResetComponent implements OnInit {
   @ViewChildren('digitInput') digitInputs!: QueryList<ElementRef>;
@@ -99,8 +20,9 @@ export class VerificarResetComponent implements OnInit {
   cargando = false;
   reenviando = false;
   cooldown = 0;
+  mostrarError = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.email = this.auth.emailPendiente();
@@ -134,16 +56,35 @@ export class VerificarResetComponent implements OnInit {
     }
   }
 
+  trackByIndex(index: number): number {
+    return index;
+  }
+
   onPaste(event: ClipboardEvent) {
     event.preventDefault();
     const paste = event.clipboardData?.getData('text')?.replace(/\D/g, '') || '';
-    if (paste.length >= 6) {
-      for (let i = 0; i < 6; i++) this.digitos[i] = paste[i];
+
+    if (paste.length > 0) {
+      // Llenar los inputs con el texto pegado
+      for (let i = 0; i < Math.min(6, paste.length); i++) {
+        this.digitos[i] = paste[i];
+      }
+
+      // Actualizar los inputs visualmente
       setTimeout(() => {
         const inputs = this.digitInputs.toArray();
-        inputs.forEach((input, i) => input.nativeElement.value = this.digitos[i]);
-        inputs[5]?.nativeElement.focus();
-        this.verificar();
+        inputs.forEach((input, i) => {
+          input.nativeElement.value = this.digitos[i];
+        });
+
+        // Enfocar el último input lleno o el siguiente vacío
+        const nextIndex = Math.min(5, paste.length);
+        inputs[nextIndex]?.nativeElement.focus();
+
+        // Auto-verificar si se completaron los 6 dígitos
+        if (this.codigoCompleto.length === 6) {
+          this.verificar();
+        }
       });
     }
   }
@@ -164,11 +105,16 @@ export class VerificarResetComponent implements OnInit {
       error: (err) => {
         this.cargando = false;
         this.error = err.error?.mensaje || 'Código incorrecto.';
-        this.digitos = ['', '', '', '', '', ''];
+        this.mostrarError = true;
+        this.cdr.markForCheck();
         setTimeout(() => {
+          this.digitos = ['', '', '', '', '', ''];
           const inputs = this.digitInputs.toArray();
+          inputs.forEach((input) => (input.nativeElement.value = ''));
           inputs[0]?.nativeElement.focus();
-        });
+          this.mostrarError = false;
+          this.cdr.markForCheck();
+        }, 600);
       }
     });
   }

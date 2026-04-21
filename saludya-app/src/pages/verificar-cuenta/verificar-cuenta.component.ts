@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, OnInit, QueryList, ViewChildren, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../app/services/auth.service';
@@ -11,7 +11,7 @@ import { AuthService } from '../../app/services/auth.service';
   templateUrl: './verificar-cuenta.component.html',
   styleUrls: ['./verificar-cuenta.component.scss'],
 })
-export class VerificarCuentaComponent implements OnInit {
+export class VerificarCuentaComponent implements OnInit, OnDestroy {
   @ViewChildren('digitInput') digitInputs!: QueryList<ElementRef>;
 
   email = '';
@@ -21,10 +21,19 @@ export class VerificarCuentaComponent implements OnInit {
   cargando = false;
   reenviando = false;
   cooldown = 0;
+  mostrarError = false;
+
+  // Pantalla de exito
+  verificado = false;
+  contadorRedireccion = 10;
+  progresoRedireccion = 0;
+  private redireccionInterval: any;
 
   constructor(
     private auth: AuthService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
   ) {}
 
   ngOnInit() {
@@ -38,54 +47,35 @@ export class VerificarCuentaComponent implements OnInit {
     return this.digitos.join('');
   }
 
-  private focusInput(index: number) {
-    const inputs = this.digitInputs.toArray();
-    inputs[index]?.nativeElement.focus();
-  }
 
-  onDigitChange(index: number) {
-    // Si el usuario escribió un dígito, avanzar al siguiente
-    if (this.digitos[index] && index < 5) {
-      setTimeout(() => this.focusInput(index + 1));
+  onDigitInput(event: Event, index: number) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.replace(/\D/g, '');
+    this.digitos[index] = value;
+    input.value = value;
+    if (value && index < 5) {
+      const inputs = this.digitInputs.toArray();
+      inputs[index + 1]?.nativeElement.focus();
     }
-    
-    // Si completó los 6 dígitos
-    if (this.digitos.every(d => d !== '')) {
+    if (this.codigoCompleto.length === 6) {
+
       this.verificar();
     }
   }
 
   onKeyDown(event: KeyboardEvent, index: number) {
-    // Permitir solo números, backspace y flechas
-    if (/^[0-9]$/.test(event.key)) {
-      if (index < 5) {
-        setTimeout(() => this.focusInput(index + 1));
-      }
-      return;
-    }
 
-    // Manejar Backspace para retroceder al input anterior si está vacío
-    if (event.key === 'Backspace') {
-      if (!this.digitos[index] && index > 0) {
-        setTimeout(() => this.focusInput(index - 1));
-      }
-      return;
-    }
+    if (event.key === 'Backspace' && !this.digitos[index] && index > 0) {
+      const inputs = this.digitInputs.toArray();
+      inputs[index - 1]?.nativeElement.focus();
 
-    // Permitir navegación con flechas
-    if (event.key === 'ArrowLeft' && index > 0) {
-      setTimeout(() => this.focusInput(index - 1));
-      return;
     }
-    if (event.key === 'ArrowRight' && index < 5) {
-      setTimeout(() => this.focusInput(index + 1));
-      return;
-    }
+  }
 
-    // Prevenir entrada de caracteres no numéricos
-    if (!['Backspace', 'ArrowLeft', 'ArrowRight', 'Tab', 'Delete'].includes(event.key)) {
-      event.preventDefault();
-    }
+
+  trackByIndex(index: number): number {
+    return index;
+
   }
 
   onPaste(event: ClipboardEvent, index: number = 0) {
@@ -121,21 +111,53 @@ export class VerificarCuentaComponent implements OnInit {
     this.auth.verificarCuenta(this.email, this.codigoCompleto).subscribe({
       next: () => {
         this.cargando = false;
-        this.exito = '¡Cuenta verificada!';
-        setTimeout(() => this.auth.redirigirPorRol(), 1000);
+        this.verificado = true;
+        this.iniciarRedireccion();
       },
       error: (err) => {
         this.cargando = false;
         this.error = err.error?.mensaje || 'Código incorrecto.';
+        this.mostrarError = true;
+        this.cdr.markForCheck();
 
-        // Limpiar inputs en caso de error
-        this.digitos = ['', '', '', '', '', ''];
+        // Limpiar inputs después de la animación
         setTimeout(() => {
+          this.digitos = ['', '', '', '', '', ''];
           const inputs = this.digitInputs.toArray();
           inputs[0]?.nativeElement.focus();
-        });
+          this.mostrarError = false;
+          this.cdr.markForCheck();
+        }, 600);
       },
     });
+  }
+
+  private iniciarRedireccion() {
+    this.contadorRedireccion = 10;
+    this.progresoRedireccion = 0;
+
+    this.ngZone.runOutsideAngular(() => {
+      this.redireccionInterval = setInterval(() => {
+        this.ngZone.run(() => {
+          this.contadorRedireccion--;
+          this.progresoRedireccion = ((10 - this.contadorRedireccion) / 10) * 100;
+          this.cdr.markForCheck();
+
+          if (this.contadorRedireccion <= 0) {
+            clearInterval(this.redireccionInterval);
+            this.irAlInicio();
+          }
+        });
+      }, 1000);
+    });
+  }
+
+  irAlInicio() {
+    if (this.redireccionInterval) {
+      clearInterval(this.redireccionInterval);
+    }
+    // Limpiar sesión para que no redirija al dashboard
+    this.auth.logout();
   }
 
   reenviar() {
@@ -164,4 +186,12 @@ export class VerificarCuentaComponent implements OnInit {
       },
     });
   }
+
+
+  ngOnDestroy() {
+    if (this.redireccionInterval) {
+      clearInterval(this.redireccionInterval);
+    }
+  }
 }
+
