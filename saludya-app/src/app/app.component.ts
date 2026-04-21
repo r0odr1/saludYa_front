@@ -8,19 +8,8 @@ import { NavbarComponent } from './components/layout/navbar/navbar.component';
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, RouterOutlet, NavbarComponent],
-  template: `
-    <app-navbar *ngIf="showNavbar" />
-    <main>
-      <router-outlet />
-    </main>
-  `,
-  styles: [
-    `
-      main {
-        min-height: calc(100vh - 68px);
-      }
-    `,
-  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
   title = 'SaludYa';
