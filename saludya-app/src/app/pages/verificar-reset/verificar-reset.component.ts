@@ -1,45 +1,44 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, QueryList, ViewChildren, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../app/services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-verificar-cuenta',
+  selector: 'app-verificar-reset',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './verificar-cuenta.component.html',
-  styleUrls: ['./verificar-cuenta.component.scss'],
+  templateUrl: './verificar-reset.component.html',
+  styleUrls: ['./verificar-reset.component.scss'],
 })
-export class VerificarCuentaComponent implements OnInit, OnDestroy {
+export class VerificarResetComponent implements OnInit {
   @ViewChildren('digitInput') digitInputs!: QueryList<ElementRef>;
 
   email = '';
   digitos: string[] = ['', '', '', '', '', ''];
   error = '';
-  exito = '';
   cargando = false;
   reenviando = false;
   cooldown = 0;
   mostrarError = false;
 
-  // Pantalla de exito
-  verificado = false;
-  contadorRedireccion = 10;
-  progresoRedireccion = 0;
-  private redireccionInterval: any;
-
   constructor(
     private auth: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private ngZone: NgZone,
   ) {}
 
   ngOnInit() {
     this.email = this.auth.emailPendiente();
     if (!this.email) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/solicitar-reset']);
     }
   }
 
@@ -92,30 +91,33 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
         // Enfocar el último input lleno o el siguiente vacío
         const nextIndex = Math.min(5, paste.length);
         inputs[nextIndex]?.nativeElement.focus();
+
+        // Auto-verificar si se completaron los 6 dígitos
+        if (this.codigoCompleto.length === 6) {
+          this.verificar();
+        }
       });
     }
   }
 
   verificar() {
     if (this.codigoCompleto.length !== 6) return;
-
     this.error = '';
-    this.exito = '';
     this.cargando = true;
 
-    this.auth.verificarCuenta(this.email, this.codigoCompleto).subscribe({
-      next: () => {
+    this.auth.verificarReset(this.email, this.codigoCompleto).subscribe({
+      next: (res) => {
         this.cargando = false;
-        this.verificado = true;
-        this.iniciarRedireccion();
+        // Guardar resetToken y navegar a nueva contraseña
+        this.router.navigate(['/nueva-contrasena'], {
+          queryParams: { token: res.resetToken },
+        });
       },
       error: (err) => {
         this.cargando = false;
         this.error = err.error?.mensaje || 'Código incorrecto.';
         this.mostrarError = true;
         this.cdr.markForCheck();
-
-        // Limpiar inputs después de la animación
         setTimeout(() => {
           this.digitos = ['', '', '', '', '', ''];
           const inputs = this.digitInputs.toArray();
@@ -128,62 +130,23 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
     });
   }
 
-  private iniciarRedireccion() {
-    this.contadorRedireccion = 10;
-    this.progresoRedireccion = 0;
-
-    this.ngZone.runOutsideAngular(() => {
-      this.redireccionInterval = setInterval(() => {
-        this.ngZone.run(() => {
-          this.contadorRedireccion--;
-          this.progresoRedireccion = ((10 - this.contadorRedireccion) / 10) * 100;
-          this.cdr.markForCheck();
-
-          if (this.contadorRedireccion <= 0) {
-            clearInterval(this.redireccionInterval);
-            this.irAlInicio();
-          }
-        });
-      }, 1000);
-    });
-  }
-
-  irAlInicio() {
-    if (this.redireccionInterval) {
-      clearInterval(this.redireccionInterval);
-    }
-    // Limpiar sesión para que no redirija al dashboard
-    this.auth.logout();
-  }
-
   reenviar() {
     this.reenviando = true;
     this.error = '';
 
-    this.auth.reenviarCodigo(this.email).subscribe({
+    this.auth.solicitarReset(this.email).subscribe({
       next: () => {
         this.reenviando = false;
-        this.exito = 'Nuevo código enviado a tu correo.';
-
-        // Cooldown de 60 segundos
         this.cooldown = 60;
         const interval = setInterval(() => {
           this.cooldown--;
           if (this.cooldown <= 0) clearInterval(interval);
         }, 1000);
-
-        setTimeout(() => (this.exito = ''), 4000);
       },
       error: (err) => {
         this.reenviando = false;
-        this.error = err.error?.mensaje || 'Error al reenviar código.';
+        this.error = err.error?.mensaje || 'Error al reenviar.';
       },
     });
-  }
-
-  ngOnDestroy() {
-    if (this.redireccionInterval) {
-      clearInterval(this.redireccionInterval);
-    }
   }
 }

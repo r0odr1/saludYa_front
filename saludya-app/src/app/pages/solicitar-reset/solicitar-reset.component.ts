@@ -1,22 +1,25 @@
-import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../app/services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-solicitar-reset',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './solicitar-reset.component.html',
-  styleUrls: ['./solicitar-reset.component.scss']
+  styleUrls: ['./solicitar-reset.component.scss'],
 })
 export class SolicitarResetComponent {
   email = '';
   error = '';
   cargando = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+  ) {}
 
   solicitar() {
     if (!this.email) {
@@ -35,7 +38,7 @@ export class SolicitarResetComponent {
       error: (err) => {
         this.cargando = false;
         this.error = err.error?.mensaje || 'Error al enviar código.';
-      }
+      },
     });
   }
 }
