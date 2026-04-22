@@ -56,7 +56,6 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
     return this.digitos.join('');
   }
 
-
   onDigitInput(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
     const value = input.value.replace(/\D/g, '');
@@ -67,46 +66,42 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
       inputs[index + 1]?.nativeElement.focus();
     }
     if (this.codigoCompleto.length === 6) {
-
       this.verificar();
     }
   }
 
   onKeyDown(event: KeyboardEvent, index: number) {
-
     if (event.key === 'Backspace' && !this.digitos[index] && index > 0) {
       const inputs = this.digitInputs.toArray();
       inputs[index - 1]?.nativeElement.focus();
-
     }
   }
 
-
   trackByIndex(index: number): number {
     return index;
-
   }
 
-  onPaste(event: ClipboardEvent, index: number = 0) {
+  onPaste(event: ClipboardEvent) {
     event.preventDefault();
-    const paste = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
-    
+    const paste = event.clipboardData?.getData('text')?.replace(/\D/g, '') || '';
+
     if (paste.length > 0) {
-      // Limpiar array primero
-      this.digitos = ['', '', '', '', '', ''];
-      
-      // Llenar el array desde la posición actual
-      for (let i = 0; i < paste.length && i < 6; i++) {
+      // Llenar los inputs con el texto pegado
+      for (let i = 0; i < Math.min(6, paste.length); i++) {
         this.digitos[i] = paste[i];
       }
-      
-      // Enfocar el siguiente input vacío
-      const nextIndex = Math.min(5, paste.length);
-      setTimeout(() => this.focusInput(nextIndex));
-      
-      if (this.digitos.every(d => d !== '')) {
-        this.verificar();
-      }
+
+      // Actualizar los inputs visualmente
+      setTimeout(() => {
+        const inputs = this.digitInputs.toArray();
+        inputs.forEach((input, i) => {
+          input.nativeElement.value = this.digitos[i];
+        });
+
+        // Enfocar el último input lleno o el siguiente vacío
+        const nextIndex = Math.min(5, paste.length);
+        inputs[nextIndex]?.nativeElement.focus();
+      });
     }
   }
 
@@ -133,6 +128,7 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
         setTimeout(() => {
           this.digitos = ['', '', '', '', '', ''];
           const inputs = this.digitInputs.toArray();
+          inputs.forEach((input) => (input.nativeElement.value = ''));
           inputs[0]?.nativeElement.focus();
           this.mostrarError = false;
           this.cdr.markForCheck();
@@ -170,8 +166,6 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
   }
 
   reenviar() {
-    if (this.cooldown > 0) return;
-    
     this.reenviando = true;
     this.error = '';
 
@@ -196,11 +190,9 @@ export class VerificarCuentaComponent implements OnInit, OnDestroy {
     });
   }
 
-
   ngOnDestroy() {
     if (this.redireccionInterval) {
       clearInterval(this.redireccionInterval);
     }
   }
 }
-
