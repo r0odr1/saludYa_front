@@ -1,8 +1,15 @@
-import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../app/services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-verificar-reset',
@@ -22,7 +29,11 @@ export class VerificarResetComponent implements OnInit {
   cooldown = 0;
   mostrarError = false;
 
-  constructor(private auth: AuthService, private router: Router, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
     this.email = this.auth.emailPendiente();
@@ -99,7 +110,7 @@ export class VerificarResetComponent implements OnInit {
         this.cargando = false;
         // Guardar resetToken y navegar a nueva contraseña
         this.router.navigate(['/nueva-contrasena'], {
-          queryParams: { token: res.resetToken }
+          queryParams: { token: res.resetToken },
         });
       },
       error: (err) => {
@@ -115,7 +126,7 @@ export class VerificarResetComponent implements OnInit {
           this.mostrarError = false;
           this.cdr.markForCheck();
         }, 600);
-      }
+      },
     });
   }
 
@@ -135,7 +146,7 @@ export class VerificarResetComponent implements OnInit {
       error: (err) => {
         this.reenviando = false;
         this.error = err.error?.mensaje || 'Error al reenviar.';
-      }
+      },
     });
   }
 }

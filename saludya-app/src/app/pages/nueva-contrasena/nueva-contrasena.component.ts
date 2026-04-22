@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../app/services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-nueva-contrasena',
@@ -33,7 +33,7 @@ export class NuevaContrasenaComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.resetToken = params['token'] || '';
       if (!this.resetToken) {
         this.router.navigate(['/solicitar-reset']);
@@ -54,10 +54,12 @@ export class NuevaContrasenaComponent implements OnInit, OnDestroy {
   }
 
   get formularioValido(): boolean {
-    return this.nuevaPassword.length >= 8
-      && this.tieneUpper
-      && this.tieneNumero
-      && this.passwordsCoinciden;
+    return (
+      this.nuevaPassword.length >= 8 &&
+      this.tieneUpper &&
+      this.tieneNumero &&
+      this.passwordsCoinciden
+    );
   }
 
   cambiarContrasena() {
@@ -74,8 +76,9 @@ export class NuevaContrasenaComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.cargando = false;
-        this.error = err.error?.mensaje || 'Error al cambiar contraseña. El enlace puede haber expirado.';
-      }
+        this.error =
+          err.error?.mensaje || 'Error al cambiar contraseña. El enlace puede haber expirado.';
+      },
     });
   }
 
