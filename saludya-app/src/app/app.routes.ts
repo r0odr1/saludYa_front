@@ -68,6 +68,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/paciente/agendar-cita/agendar-cita.component').then(m => m.AgendarCitaComponent)
   },
+  {
+    path: 'paciente/mis-citas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/paciente/mis-citas/mis-citas.component').then(m => m.MisCitasComponent)
+  },
 
   /** Administrador */
   {
