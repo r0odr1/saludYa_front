@@ -59,6 +59,11 @@ export const routes: Routes = [
       import('./pages/paciente/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
+    path: 'paciente/especialidades',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/paciente/especialidades/especialidades.component').then(m => m.EspecialidadesComponent)
+  },
+  {
     path: 'paciente/agendar/:especialidadId',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/paciente/agendar-cita/agendar-cita.component').then(m => m.AgendarCitaComponent)
