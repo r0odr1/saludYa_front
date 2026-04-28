@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, of, shareReplay, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CitaService {
   private apiUrl = `${environment.apiUrl}/citas`;
+  private especialidadesCache$?: Observable<any[]>;
 
   constructor(private http: HttpClient) {}
 
@@ -14,8 +15,42 @@ export class CitaService {
     return this.http.get<any>(`${this.apiUrl}/doctores`);
   }
 
-  getEspecialidades(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/especialidades`);
+  getEspecialidades(): Observable<any[]> {
+    // Limpiar caché para debugging
+    this.especialidadesCache$ = undefined;
+
+    if (!this.especialidadesCache$) {
+      this.especialidadesCache$ = this.http.get<any>(`${this.apiUrl}/especialidades`).pipe(
+        catchError((err) => {
+          if (err.status === 404) {
+            return this.http.get<any>(`${environment.apiUrl}/especialidades`);
+          }
+          return throwError(() => err);
+        }),
+        map((res) => {
+          const normalized = this.normalizeEspecialidadesResponse(res);
+          return normalized;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+    }
+    return this.especialidadesCache$;
+  }
+
+  private normalizeEspecialidadesResponse(res: any): any[] {
+    if (Array.isArray(res)) {
+      return res;
+    }
+    if (res && Array.isArray(res.especialidades)) {
+      return res.especialidades;
+    }
+    if (res && Array.isArray(res.data)) {
+      return res.data;
+    }
+    if (res && typeof res === 'object') {
+      return [res];
+    }
+    return [];
   }
 
   getDoctoresPorEspecialidad(especialidadId: string): Observable<any> {
