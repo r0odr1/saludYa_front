@@ -100,6 +100,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/admin/gestionar-usuarios/gestionar-usuarios.component').then(m => m.GestionarUsuariosComponent)
   },
+  {
+    path: 'admin/citas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/gestionar-citas/gestionar-citas.component').then(m => m.GestionarCitasComponent)
+  },
 
   { path: '**', redirectTo: '/login' },
 ];
