@@ -56,7 +56,7 @@ export class AgendarCitaComponent implements OnInit {
     //** Cargar tambien informacion de especialidad */
     this.citaService.getEspecialidades().subscribe({
       next: (res) => {
-        this.especialidad = res.especialidades.find((e: any) => e._id === this.especialidadId);
+        this.especialidad = res.find((e: any) => e._id === this.especialidadId);
       }
     });
   }
