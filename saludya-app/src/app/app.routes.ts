@@ -85,6 +85,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/admin/gestionar-doctores/gestionar-doctores.component').then(m => m.GestionarDoctoresComponent)
   },
+  {
+    path: 'admin/especialidades',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/gestionar-especialidades/gestionar-especialidades.component').then(m => m.GestionarEspecialidadesComponent)
+  },
 
   { path: '**', redirectTo: '/login' },
 ];
