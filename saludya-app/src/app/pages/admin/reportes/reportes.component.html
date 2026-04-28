@@ -1,0 +1,76 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Reportes</h1>
+    <p>Estadísticas de atención del consultorio</p>
+  </div>
+
+  <!-- Selector de periodo -->
+  <div class="periodo-selector">
+    <div class="form-group" style="margin:0">
+      <label>Mes</label>
+      <select class="form-control" [(ngModel)]="mesSeleccionado" (change)="cargarReportes()" style="width:auto">
+        <option *ngFor="let m of meses; let i = index" [value]="i + 1">{{ m }}</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>Año</label>
+      <select class="form-control" [(ngModel)]="anioSeleccionado" (change)="cargarReportes()" style="width:auto">
+        <option [value]="2025">2025</option>
+        <option [value]="2026">2026</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <div *ngIf="!cargando" class="reportes-content">
+    <!-- Stats cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1e7dd;color:#0f5132">📅</div>
+        <div class="stat-info">
+          <h4>Total Citas</h4>
+          <div class="stat-number">{{ reporte.totalCitas }}</div>
+        </div>
+      </div>
+      <div class="stat-card" *ngFor="let est of reporte.porEstado">
+        <div class="stat-icon" [ngStyle]="getEstadoStyle(est._id)">{{ getEstadoIcon(est._id) }}</div>
+        <div class="stat-info">
+          <h4>{{ est._id | titlecase }}</h4>
+          <div class="stat-number">{{ est.total }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Citas por especialidad -->
+    <div class="card-flat" style="margin-top:28px">
+      <h3 style="margin-bottom:20px; font-family:var(--font-display); font-size:1.2rem">Citas por Especialidad</h3>
+
+      <div *ngIf="reporte.porEspecialidad.length === 0" class="empty-state" style="padding:30px">
+        <h3>Sin datos para este período</h3>
+      </div>
+
+      <div class="bar-chart">
+        <div class="bar-row" *ngFor="let item of reporte.porEspecialidad">
+          <span class="bar-label">{{ item.especialidad }}</span>
+          <div class="bar-track">
+            <div class="bar-fill animate-in" [style.width]="getBarWidth(item.total) + '%'" [style.background]="getBarColor(item.especialidad)">
+              <span class="bar-value">{{ item.total }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen en texto -->
+    <div class="card-flat resumen-texto" style="margin-top:20px" *ngIf="reporte.totalCitas > 0">
+      <h3 style="margin-bottom:12px; font-family:var(--font-display); font-size:1.2rem">📊 Resumen</h3>
+      <p>Durante <strong>{{ meses[mesSeleccionado - 1] }} {{ anioSeleccionado }}</strong> se registraron
+        <strong>{{ reporte.totalCitas }} citas</strong> en total.</p>
+      <p *ngIf="reporte.porEspecialidad.length > 0">
+        La especialidad más solicitada fue <strong>{{ reporte.porEspecialidad[0]?.especialidad }}</strong>
+        con {{ reporte.porEspecialidad[0]?.total }} citas.
+      </p>
+    </div>
+  </div>
+</div>

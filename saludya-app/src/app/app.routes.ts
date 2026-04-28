@@ -90,6 +90,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/admin/gestionar-especialidades/gestionar-especialidades.component').then(m => m.GestionarEspecialidadesComponent)
   },
+  {
+    path: 'admin/reportes',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/reportes/reportes.component').then(m => m.ReportesComponent)
+  },
 
   { path: '**', redirectTo: '/login' },
 ];
