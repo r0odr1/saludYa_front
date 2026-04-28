@@ -11,7 +11,7 @@
 
     <div class="code-inputs" [class.shake]="mostrarError">
       <input
-        *ngFor="let d of digitos; let i = index"
+        *ngFor="let d of digitos; let i = index; trackBy: trackByIndex"
         #digitInput
         type="text"
         maxlength="1"
