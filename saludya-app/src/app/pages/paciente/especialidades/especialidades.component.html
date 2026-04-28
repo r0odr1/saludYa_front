@@ -9,7 +9,15 @@
     <p>Cargando especialidades...</p>
   </div>
 
-  <div class="especialidades-grid" *ngIf="!cargando">
+  <div *ngIf="!cargando && error" class="empty-state error-state">
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!cargando && !error && especialidades.length === 0" class="empty-state">
+    <p>No se encontraron especialidades en este momento.</p>
+  </div>
+
+  <div class="especialidades-grid" *ngIf="!cargando && !error && especialidades.length > 0">
     <div
       class="esp-card animate-in"
       *ngFor="let esp of especialidades; let i = index"
