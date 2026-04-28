@@ -7,8 +7,8 @@ import { AdminService } from '../../../services/admin.service';
   selector: 'app-gestionar-doctores',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: './gestionar-doctores.component.html',
-  styles: ['./gestionar-doctores.component.scss']
+  templateUrl: './gestionar-doctores.component.html',
+  styleUrls: ['./gestionar-doctores.component.scss']
 })
 
 export class GestionarDoctoresComponent implements OnInit {

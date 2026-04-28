@@ -8,7 +8,7 @@ import { AdminService } from '../../../services/admin.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './gestionar-especialidades.component.html',
-  styles: ['./gestionar-especialidades.component.scss']
+  styleUrls: ['./gestionar-especialidades.component.scss']
 })
 export class GestionarEspecialidadesComponent implements OnInit {
   especialidades: any[] = [];

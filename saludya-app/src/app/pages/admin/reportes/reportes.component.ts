@@ -8,7 +8,7 @@ import { AdminService } from '../../../services/admin.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './reportes.component.html',
-  styles: ['./reportes.component.scss']
+  styleUrls: ['./reportes.component.scss']
 })
 export class ReportesComponent implements OnInit {
   meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
