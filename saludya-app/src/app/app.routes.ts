@@ -80,6 +80,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/admin/dashboard-admin/dashboard-admin.component').then(m => m.DashboardAdminComponent)
   },
+  {
+    path: 'admin/doctores',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/gestionar-doctores/gestionar-doctores.component').then(m => m.GestionarDoctoresComponent)
+  },
 
   { path: '**', redirectTo: '/login' },
 ];
