@@ -1,0 +1,40 @@
+<div class="page-wrapper">
+  <a routerLink="/doctor/agenda" class="btn btn-ghost" style="margin-bottom:16px">← Volver a agenda</a>
+
+  <div class="page-header">
+    <h1>Historial del Paciente</h1>
+    <p *ngIf="pacienteNombre">{{ pacienteNombre }}</p>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <div *ngIf="!cargando && historial.length === 0" class="empty-state">
+    <div class="icon">📋</div>
+    <h3>No hay historial para este paciente</h3>
+  </div>
+
+  <div class="timeline" *ngIf="!cargando">
+    <div class="timeline-item animate-in" *ngFor="let cita of historial; let i = index" [style.animation-delay]="(i*0.08)+'s'">
+      <div class="tl-dot" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
+      <div class="tl-card">
+        <div class="tl-header">
+          <div>
+            <h4>{{ cita.especialidad?.nombre }}</h4>
+            <span class="tl-date">📅 {{ formatFecha(cita.fecha) }} · {{ cita.horaInicio }} - {{ cita.horaFin }}</span>
+          </div>
+          <span class="badge" [ngClass]="{'badge-success': cita.estado==='agendada', 'badge-info': cita.estado==='completada', 'badge-danger': cita.estado==='cancelada'}">
+            {{ cita.estado | titlecase }}
+          </span>
+        </div>
+        <p class="tl-doc">👨‍⚕️ {{ cita.doctor?.usuario?.nombre }}</p>
+
+        <div class="tl-notas" *ngIf="cita.notas?.length > 0">
+          <div class="nota" *ngFor="let nota of cita.notas">
+            <p>{{ nota.contenido }}</p>
+            <small>— {{ nota.doctor?.nombre || 'Doctor' }} · {{ formatFechaCorta(nota.fecha) }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

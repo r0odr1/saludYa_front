@@ -1,0 +1,136 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Mi Agenda</h1>
+    <p>Gestiona tus citas, agrega notas y reasigna si es necesario</p>
+  </div>
+
+  <!-- Selector de fecha -->
+  <div class="fecha-selector">
+    <button class="btn btn-ghost btn-sm" (click)="cambiarDia(-1)">← Anterior</button>
+    <div class="fecha-actual">
+      <input type="date" [value]="fechaSeleccionada" (change)="onFechaChange($event)" class="date-input">
+      <span class="fecha-label">{{ fechaLabel }}</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" (click)="cambiarDia(1)">Siguiente →</button>
+  </div>
+
+  <!-- Filtro de estado -->
+  <div class="filtros">
+    <button class="filtro-btn" [class.active]="filtroEstado===''" (click)="filtroEstado=''; cargarAgenda()">Todas</button>
+    <button class="filtro-btn" [class.active]="filtroEstado==='agendada'" (click)="filtroEstado='agendada'; cargarAgenda()">Agendadas</button>
+    <button class="filtro-btn" [class.active]="filtroEstado==='completada'" (click)="filtroEstado='completada'; cargarAgenda()">Completadas</button>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <div *ngIf="!cargando && citas.length === 0" class="empty-state">
+    <div class="icon">📅</div>
+    <h3>No hay citas para esta fecha</h3>
+  </div>
+
+  <div class="agenda-list" *ngIf="!cargando">
+    <div class="agenda-item animate-in" *ngFor="let cita of citas; let i = index" [style.animation-delay]="(i*0.06)+'s'">
+      <div class="agenda-time">
+        <span class="t-start">{{ cita.horaInicio }}</span>
+        <span class="t-end">{{ cita.horaFin }}</span>
+      </div>
+
+      <div class="agenda-card" [class.completed]="cita.estado === 'completada'">
+        <div class="agenda-top">
+          <div>
+            <h3>{{ cita.paciente?.nombre }}</h3>
+            <span class="esp-badge" [style.background]="cita.especialidad?.color + '20'" [style.color]="cita.especialidad?.color">
+              {{ cita.especialidad?.nombre }}
+            </span>
+          </div>
+          <span class="badge" [ngClass]="{'badge-success': cita.estado==='agendada', 'badge-info': cita.estado==='completada', 'badge-danger': cita.estado==='cancelada'}">
+            {{ cita.estado | titlecase }}
+          </span>
+        </div>
+
+        <p class="paciente-contact">📧 {{ cita.paciente?.email }} · 📱 {{ cita.paciente?.telefono || 'N/A' }}</p>
+
+        <!-- Notas existentes -->
+        <div class="notas-section" *ngIf="cita.notas?.length > 0">
+          <h5>📝 Historial de notas</h5>
+          <div class="nota" *ngFor="let nota of cita.notas">
+            <p>{{ nota.contenido }}</p>
+            <small>— {{ nota.doctor?.nombre || 'Doctor' }} · {{ formatFechaCorta(nota.fecha) }}</small>
+          </div>
+        </div>
+
+        <!-- Acciones del doctor -->
+        <div class="doc-actions" *ngIf="cita.estado === 'agendada'">
+          <button class="btn btn-primary btn-sm" (click)="completarCita(cita)">✅ Completar</button>
+          <button class="btn btn-outline btn-sm" (click)="abrirNotas(cita)">📝 Nota</button>
+          <button class="btn btn-ghost btn-sm" (click)="abrirReasignar(cita)">🔄 Reasignar</button>
+          <a [routerLink]="['/doctor/historial', cita.paciente?._id]" class="btn btn-ghost btn-sm">📋 Historial</a>
+        </div>
+
+        <div class="doc-actions" *ngIf="cita.estado === 'completada'">
+          <button class="btn btn-outline btn-sm" (click)="abrirNotas(cita)">📝 Agregar nota</button>
+          <a [routerLink]="['/doctor/historial', cita.paciente?._id]" class="btn btn-ghost btn-sm">📋 Historial</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Notas -->
+  <div class="modal-backdrop" *ngIf="citaNota" (click)="citaNota = null">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Agregar Nota Médica</h3>
+        <button class="btn btn-ghost btn-sm" (click)="citaNota = null">✕</button>
+      </div>
+      <p style="margin-bottom:12px">Paciente: <strong>{{ citaNota.paciente?.nombre }}</strong></p>
+      <div class="form-group">
+        <label>Nota / Observaciones</label>
+        <textarea class="form-control" [(ngModel)]="contenidoNota" rows="4" placeholder="Diagnóstico, tratamiento realizado, recomendaciones..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="citaNota = null">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarNota()" [disabled]="!contenidoNota.trim() || procesando">
+          {{ procesando ? 'Guardando...' : 'Guardar nota' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Reasignar -->
+  <div class="modal-backdrop" *ngIf="citaReasignar" (click)="citaReasignar = null">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Reasignar Cita</h3>
+        <button class="btn btn-ghost btn-sm" (click)="citaReasignar = null">✕</button>
+      </div>
+      <p style="margin-bottom:16px">Reasignar la cita de <strong>{{ citaReasignar.paciente?.nombre }}</strong> a otro doctor disponible en el mismo horario.</p>
+
+      <div *ngIf="cargandoDoctores" class="loading-wrapper" style="padding:20px"><div class="spinner"></div></div>
+
+      <div class="doctor-options" *ngIf="!cargandoDoctores">
+        <div *ngIf="doctoresDisponibles.length === 0" class="alert alert-warning">No hay otros doctores disponibles en este horario.</div>
+        <div
+          class="doctor-option"
+          *ngFor="let doc of doctoresDisponibles"
+          [class.selected]="doctorReasignar === doc._id"
+          (click)="doctorReasignar = doc._id"
+        >
+          <div class="doc-avatar">{{ doc.usuario?.nombre?.charAt(0) }}</div>
+          <div>
+            <h4>{{ doc.usuario?.nombre }}</h4>
+            <p>{{ doc.usuario?.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="errorReasignar" style="margin-top:12px">{{ errorReasignar }}</div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="citaReasignar = null">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarReasignar()" [disabled]="!doctorReasignar || procesando">
+          {{ procesando ? 'Reasignando...' : 'Reasignar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

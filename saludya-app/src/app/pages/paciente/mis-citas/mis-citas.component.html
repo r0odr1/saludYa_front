@@ -1,0 +1,123 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Mis Citas</h1>
+    <p>Gestiona tus citas agendadas</p>
+  </div>
+
+  <div class="filtros">
+    <button class="filtro-btn" [class.active]="filtro === 'todas'" (click)="filtro = 'todas'">Todas</button>
+    <button class="filtro-btn" [class.active]="filtro === 'agendada'" (click)="filtro = 'agendada'">Agendadas</button>
+    <button class="filtro-btn" [class.active]="filtro === 'completada'" (click)="filtro = 'completada'">Completadas</button>
+    <button class="filtro-btn" [class.active]="filtro === 'cancelada'" (click)="filtro = 'cancelada'">Canceladas</button>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <div *ngIf="!cargando && citasFiltradas.length === 0" class="empty-state">
+    <div class="icon">📋</div>
+    <h3>No hay citas {{ filtro !== 'todas' ? filtro + 's' : '' }}</h3>
+    <a routerLink="/paciente/especialidades" class="btn btn-primary" style="margin-top:16px">Agendar una cita</a>
+  </div>
+
+  <div class="citas-list" *ngIf="!cargando">
+    <div class="cita-item animate-in" *ngFor="let cita of citasFiltradas; let i = index" [style.animation-delay]="(i*0.06)+'s'">
+      <div class="cita-bar" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
+      <div class="cita-content">
+        <div class="cita-header">
+          <div>
+            <h3>{{ cita.especialidad?.nombre }}</h3>
+            <p class="cita-doc">👨‍⚕️ {{ cita.doctor?.usuario?.nombre }}</p>
+          </div>
+          <span class="badge" [ngClass]="{
+            'badge-success': cita.estado === 'agendada',
+            'badge-info': cita.estado === 'completada',
+            'badge-danger': cita.estado === 'cancelada',
+            'badge-warning': cita.estado === 'no_asistio'
+          }">{{ cita.estado | titlecase }}</span>
+        </div>
+        <div class="cita-details">
+          <span>📅 {{ formatFecha(cita.fecha) }}</span>
+          <span>🕐 {{ cita.horaInicio }} - {{ cita.horaFin }}</span>
+          <span>⏱ {{ cita.especialidad?.duracionMinutos }} min</span>
+        </div>
+
+        <div class="cita-notas" *ngIf="cita.notas && cita.notas.length > 0">
+          <h5>📝 Notas médicas</h5>
+          <div class="nota" *ngFor="let nota of cita.notas">
+            <p>{{ nota.contenido }}</p>
+            <small>— {{ nota.doctor?.nombre || 'Doctor' }} · {{ formatFechaCorta(nota.fecha) }}</small>
+          </div>
+        </div>
+
+        <div class="cita-actions" *ngIf="cita.estado === 'agendada'">
+          <div *ngIf="!cita.esCancelable" class="restriccion-aviso">
+            🔒 No se puede modificar (faltan menos de 3 horas)
+          </div>
+          <ng-container *ngIf="cita.esCancelable">
+            <button class="btn btn-outline btn-sm" (click)="abrirEditar(cita)">✏️ Editar</button>
+            <button class="btn btn-danger btn-sm" (click)="confirmarCancelar(cita)">✕ Cancelar</button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="citaCancelar" (click)="citaCancelar = null">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Cancelar Cita</h3>
+        <button class="btn btn-ghost btn-sm" (click)="citaCancelar = null">✕</button>
+      </div>
+      <p>¿Estás seguro de cancelar tu cita de <strong>{{ citaCancelar.especialidad?.nombre }}</strong> el <strong>{{ formatFecha(citaCancelar.fecha) }}</strong> a las <strong>{{ citaCancelar.horaInicio }}</strong>?</p>
+      <p class="modal-note">El horario quedará disponible para otros pacientes.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="citaCancelar = null">No, mantener</button>
+        <button class="btn btn-danger" (click)="cancelarCita()" [disabled]="procesando">
+          {{ procesando ? 'Cancelando...' : 'Sí, cancelar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="citaEditar" (click)="citaEditar = null">
+    <div class="modal-content" (click)="$event.stopPropagation()" style="max-width:600px">
+      <div class="modal-header">
+        <h3>Reprogramar Cita</h3>
+        <button class="btn btn-ghost btn-sm" (click)="citaEditar = null">✕</button>
+      </div>
+      <p class="modal-description">Selecciona una nueva fecha y horario para tu cita de <strong>{{ citaEditar.especialidad?.nombre }}</strong>.</p>
+
+      <div class="edit-fecha-grid">
+        <div
+          class="fecha-mini"
+          *ngFor="let f of fechasEdit"
+          [class.selected]="nuevaFecha === f.valor"
+          (click)="seleccionarNuevaFecha(f.valor)"
+        >
+          <span>{{ f.diaSemana }}</span>
+          <strong>{{ f.dia }}</strong>
+        </div>
+      </div>
+
+      <div *ngIf="cargandoHorariosEdit" class="loading-wrapper" style="padding:20px"><div class="spinner"></div></div>
+
+      <div class="edit-horarios" *ngIf="horariosEdit.length > 0">
+        <button
+          class="horario-mini"
+          *ngFor="let h of horariosEdit"
+          [class.selected]="nuevoHorario === h.inicio"
+          (click)="nuevoHorario = h.inicio"
+        >{{ h.inicio }}</button>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="errorEdit" style="margin-top:12px">{{ errorEdit }}</div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="citaEditar = null">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarEdicion()" [disabled]="!nuevoHorario || procesando">
+          {{ procesando ? 'Guardando...' : 'Reprogramar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
