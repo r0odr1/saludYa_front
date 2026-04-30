@@ -80,6 +80,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/doctor/dashboard-doctor/dashboard-doctor.component').then(m => m.DashboardDoctorComponent)
   },
+  {
+    path: 'doctor/agenda',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/doctor/agenda/agenda.component').then(m => m.AgendaComponent)
+  },
 
   /** Administrador */
   {
