@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -25,7 +25,8 @@ export class DashboardDoctorComponent implements OnInit {
 
   constructor(
     public auth: AuthService,
-    private citaService: CitaService
+    private citaService: CitaService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -37,8 +38,9 @@ export class DashboardDoctorComponent implements OnInit {
         this.completadas = res.citas.filter((c: any) => c.estado === 'completada').length;
         this.pendientes = res.citas.filter((c: any) => c.estado === 'agendada').length;
         this.cargando = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.cargando = false; }
+      error: () => { this.cargando = false; this.cdr.detectChanges(); }
     });
   }
 }

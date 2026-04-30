@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -29,7 +29,10 @@ export class AgendaComponent implements OnInit {
 
   procesando = false;
 
-  constructor(private citaService: CitaService) {}
+  constructor(
+    private citaService: CitaService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.fechaSeleccionada = new Date().toISOString().split('T')[0];
@@ -40,8 +43,8 @@ export class AgendaComponent implements OnInit {
   cargarAgenda() {
     this.cargando = true;
     this.citaService.getAgendaDoctor(this.fechaSeleccionada, this.filtroEstado || undefined).subscribe({
-      next: (res) => { this.citas = res.citas; this.cargando = false; },
-      error: () => { this.cargando = false; }
+      next: (res) => { this.citas = res.citas; this.cargando = false; this.cdr.detectChanges(); },
+      error: () => { this.cargando = false; this.cdr.detectChanges(); }
     });
   }
 
