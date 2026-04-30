@@ -1,66 +1,203 @@
 .welcome-banner {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-      color: white; border-radius: var(--radius-lg); padding: 32px 40px;
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;
-    }
-    .welcome-banner h1 { font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 6px; }
-    .welcome-banner p { opacity: 0.9; font-size: 0.95rem; }
-    .welcome-emoji { font-size: 3rem; }
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
-    .stat-card {
-      background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md);
-      padding: 24px; display: flex; align-items: center; gap: 16px;
-    }
-    .stat-icon { font-size: 2rem; }
-    .stat-content { flex: 1; }
-    .stat-number { font-size: 2rem; font-weight: 700; color: var(--color-primary); margin-bottom: 4px; }
-    .stat-label { font-size: 0.9rem; color: var(--color-text-light); }
+.welcome-banner h1 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
 
-    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
-    .action-card {
-      padding: 28px; border-radius: var(--radius-md); display: flex; flex-direction: column;
-      position: relative; overflow: hidden; transition: var(--transition);
-    }
-    .action-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-    .action-primary { background: var(--color-accent-light); border: 1px solid #f0d98a; }
-    .action-secondary { background: var(--color-primary-lighter); border: 1px solid #a3cfbb; }
-    .action-icon { font-size: 2rem; margin-bottom: 12px; }
-    .action-card h3 { font-size: 1.15rem; margin-bottom: 6px; color: var(--color-text); }
-    .action-card p { font-size: 0.85rem; color: var(--color-text-light); }
-    .action-arrow { position: absolute; top: 20px; right: 20px; font-size: 1.3rem; opacity: 0.4; transition: var(--transition); }
-    .action-card:hover .action-arrow { opacity: 1; transform: translateX(4px); }
+.welcome-banner p {
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
 
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .section-header h2 { font-family: var(--font-display); font-size: 1.4rem; color: var(--color-primary-dark); }
-    .ver-todas { color: var(--color-primary); font-weight: 600; font-size: 0.9rem; }
+.welcome-emoji {
+  font-size: 3rem;
+}
 
-    .citas-list { display: flex; flex-direction: column; gap: 12px; }
-    .cita-card {
-      background: white; border-radius: var(--radius-md); border: 1px solid var(--color-border);
-      display: flex; overflow: hidden; transition: var(--transition);
-    }
-    .cita-card:hover { box-shadow: var(--shadow-md); }
-    .cita-color-bar { width: 5px; flex-shrink: 0; }
-    .cita-body { padding: 18px 20px; flex: 1; }
-    .cita-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    .cita-fecha { font-size: 0.82rem; color: var(--color-text-light); }
-    .cita-body h4 { font-size: 1rem; margin-bottom: 4px; }
-    .cita-doctor, .cita-hora { font-size: 0.85rem; color: var(--color-text-light); }
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
 
-    .activity-list { display: flex; flex-direction: column; gap: 16px; }
-    .activity-item {
-      background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md);
-      padding: 20px; display: flex; align-items: center; gap: 16px;
-    }
-    .activity-icon { font-size: 1.5rem; }
-    .activity-content { flex: 1; }
-    .activity-content p { margin: 0; color: var(--color-text); }
-    .activity-time { font-size: 0.8rem; color: var(--color-text-light); }
+.action-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid transparent;
+  min-height: 170px;
+}
 
-    @media (max-width: 768px) {
-      .quick-actions { grid-template-columns: 1fr; }
-      .welcome-emoji { display: none; }
-      .welcome-banner { padding: 24px; }
-      .stats-grid { grid-template-columns: 1fr; }
-    }
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.action-primary {
+  background: #fffaed;
+  border-color: #f4df9d;
+}
+
+.action-secondary {
+  background: #effaf4;
+  border-color: #c9ebd7;
+}
+
+.action-icon {
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+}
+
+.action-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+.action-card p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-text-light);
+}
+
+.action-arrow {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  font-size: 1.4rem;
+  opacity: 0.35;
+  transition: var(--transition);
+}
+
+.action-card:hover .action-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--color-primary-dark);
+}
+
+.ver-todas {
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.citas-list {
+  display: grid;
+  gap: 16px;
+}
+
+.cita-card {
+  background: white;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: flex;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.cita-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.cita-color-bar {
+  width: 6px;
+  flex-shrink: 0;
+}
+
+.cita-body {
+  padding: 22px 24px;
+  flex: 1;
+}
+
+.cita-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.cita-fecha {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
+.cita-body h3 {
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+}
+
+.cita-doctor {
+  margin: 0;
+  color: var(--color-text-light);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.cita-footer {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--color-text-light);
+  font-size: 0.92rem;
+}
+
+.cita-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  .welcome-emoji {
+    display: none;
+  }
+  .welcome-banner {
+    padding: 24px;
+  }
+}
