@@ -48,14 +48,20 @@
     <div class="cita-card animate-in" *ngFor="let cita of proximasCitas; let i = index" [style.animationDelay]="(i * 0.08) + 's'">
       <div class="cita-color-bar" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
       <div class="cita-body">
-        <div class="cita-top">
-          <span class="badge">{{ cita.estado | titlecase }}</span>
-          <span class="cita-fecha">📅 {{ formatFecha(cita.fecha) }}</span>
-        </div>
-        <h3>{{ cita.especialidad?.nombre }}</h3>
-        <p class="cita-doctor">Dr. {{ cita.doctor?.usuario?.nombre }}</p>
-        <div class="cita-footer">
-          <span class="cita-time">🕐 {{ cita.horaInicio }} - {{ cita.horaFin }}</span>
+        <div class="cita-content">
+
+          <!-- IZQUIERDA -->
+          <div class="cita-left">
+            <span class="badge">{{ cita.estado | titlecase }}</span>
+            <h3>{{ cita.especialidad?.nombre }}</h3>
+            <p class="cita-doctor">Dr. {{ cita.doctor?.usuario?.nombre }}</p>
+          </div>
+
+          <!-- DERECHA -->
+          <div class="cita-datetime">
+            <span class="cita-fecha">📅 {{ formatFecha(cita.fecha) }}</span>
+            <span class="cita-time">🕐 {{ cita.horaInicio }} - {{ cita.horaFin }}</span>
+          </div>
         </div>
       </div>
     </div>
