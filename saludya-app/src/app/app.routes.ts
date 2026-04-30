@@ -74,6 +74,13 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/paciente/mis-citas/mis-citas.component').then(m => m.MisCitasComponent)
   },
 
+  /** Doctor */
+  {
+    path: 'doctor/dashboard',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/doctor/dashboard-doctor/dashboard-doctor.component').then(m => m.DashboardDoctorComponent)
+  },
+
   /** Administrador */
   {
     path: 'admin/dashboard',
