@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
 
@@ -8,9 +8,8 @@ import { AdminService } from '../../../services/admin.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './gestionar-citas.component.html',
-  styleUrls: ['./gestionar-citas.component.scss']
+  styleUrls: ['./gestionar-citas.component.scss'],
 })
-
 export class GestionarCitasComponent implements OnInit {
   citas: any[] = [];
   cargando = true;
@@ -26,9 +25,14 @@ export class GestionarCitasComponent implements OnInit {
   citaSeleccionada: any = null;
   editarCitaDatos = { fecha: '', horaInicio: '', estado: '' };
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
-  ngOnInit() { this.cargar(); }
+  ngOnInit() {
+    this.cargar();
+  }
 
   cargar() {
     this.cargando = true;
@@ -37,8 +41,15 @@ export class GestionarCitasComponent implements OnInit {
     if (this.filtroEstado) filtros.estado = this.filtroEstado;
 
     this.adminService.listarCitas(filtros).subscribe({
-      next: (res) => { this.citas = res.citas; this.cargando = false; },
-      error: () => { this.cargando = false; }
+      next: (res) => {
+        this.citas = res.citas;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -51,16 +62,32 @@ export class GestionarCitasComponent implements OnInit {
   formatFecha(fecha: string): string {
     if (!fecha) return '';
     const d = new Date(fecha);
-    const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const meses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
     return `${dias[d.getUTCDay()]} ${d.getUTCDate()} ${meses[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
   }
 
-  limpiarMensajes() { this.error = ''; this.mensaje = ''; }
+  limpiarMensajes() {
+    this.error = '';
+    this.mensaje = '';
+  }
 
   mostrarMensaje(msg: string) {
     this.mensaje = msg;
-    setTimeout(() => this.mensaje = '', 4000);
+    setTimeout(() => (this.mensaje = ''), 4000);
   }
 
   /** Editar Cita */
@@ -70,7 +97,7 @@ export class GestionarCitasComponent implements OnInit {
     this.editarCitaDatos = {
       fecha: fechaStr,
       horaInicio: cita.horaInicio,
-      estado: cita.estado
+      estado: cita.estado,
     };
     this.limpiarMensajes();
     this.modalEditar = true;
@@ -90,7 +117,7 @@ export class GestionarCitasComponent implements OnInit {
       error: (err) => {
         this.procesando = false;
         this.error = err.error?.mensaje || 'Error al actualizar cita.';
-      }
+      },
     });
   }
 
@@ -115,7 +142,7 @@ export class GestionarCitasComponent implements OnInit {
       error: (err) => {
         this.procesando = false;
         this.error = err.error?.mensaje || 'Error al eliminar cita.';
-      }
+      },
     });
   }
 }

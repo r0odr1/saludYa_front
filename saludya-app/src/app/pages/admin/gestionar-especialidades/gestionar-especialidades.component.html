@@ -47,7 +47,7 @@
   <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
 
   <div class="esp-list" *ngIf="!cargando">
-    <div class="esp-item animate-in" *ngFor="let esp of especialidades; let i = index" [style.animation-delay]="(i*0.06)+'s'">
+    <div class="esp-item animate-in" *ngFor="let esp of especialidades || []; let i = index" [style.animation-delay]="(i*0.06)+'s'">
       <div class="esp-color" [style.background]="esp.color"></div>
       <div class="esp-info">
         <h4>{{ esp.nombre }}</h4>

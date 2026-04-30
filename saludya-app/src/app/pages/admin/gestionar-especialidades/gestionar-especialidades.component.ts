@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
@@ -21,15 +21,30 @@ export class GestionarEspecialidadesComponent implements OnInit {
 
   form = { nombre: '', descripcion: '', duracionMinutos: 30, color: '#4F46E5' };
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() { this.cargar(); }
 
   cargar() {
     this.cargando = true;
+    this.especialidades = [];
     this.adminService.listarEspecialidades().subscribe({
-      next: (res) => { this.especialidades = res.especialidades; this.cargando = false; },
-      error: () => { this.cargando = false; }
+      next: (res) => {
+        this.especialidades = Array.isArray(res?.especialidades)
+          ? res.especialidades
+          : Array.isArray(res)
+            ? res
+            : [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
@@ -56,15 +56,18 @@ export class GestionarUsuariosComponent implements OnInit {
 
   private buscarTimeout: any;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() { this.cargar(); }
 
   cargar() {
     this.cargando = true;
     this.adminService.listarUsuarios(this.filtroRol, this.busqueda).subscribe({
-      next: (res) => { this.usuarios = res.usuarios; this.cargando = false; },
-      error: () => { this.cargando = false; }
+      next: (res) => { this.usuarios = res.usuarios; this.cargando = false; this.cdr.detectChanges(); },
+      error: () => { this.cargando = false; this.cdr.detectChanges(); }
     });
   }
 

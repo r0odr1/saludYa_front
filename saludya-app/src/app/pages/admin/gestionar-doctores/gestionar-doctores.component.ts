@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
@@ -30,20 +30,33 @@ export class GestionarDoctoresComponent implements OnInit {
     { dia: 6, nombre: 'Sábado', activo: false, horaInicio: '08:00', horaFin: '13:00' },
   ];
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.cargarDoctores();
     this.adminService.listarEspecialidades().subscribe({
-      next: (res) => { this.especialidades = res.especialidades; }
+      next: (res) => {
+        this.especialidades = res.especialidades;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   cargarDoctores() {
     this.cargando = true;
     this.adminService.listarDoctores().subscribe({
-      next: (res) => { this.doctores = res.doctores; this.cargando = false; },
-      error: () => { this.cargando = false; }
+      next: (res) => {
+        this.doctores = res.doctores;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

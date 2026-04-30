@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
@@ -20,7 +20,10 @@ export class ReportesComponent implements OnInit {
 
   private maxCitas = 1;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() { this.cargarReportes(); }
 
@@ -31,8 +34,9 @@ export class ReportesComponent implements OnInit {
         this.reporte = res;
         this.maxCitas = Math.max(...(res.porEspecialidad?.map((e: any) => e.total) || [1]), 1);
         this.cargando = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.cargando = false; }
+      error: () => { this.cargando = false; this.cdr.detectChanges(); }
     });
   }
 
