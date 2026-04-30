@@ -85,6 +85,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/doctor/agenda/agenda.component').then(m => m.AgendaComponent)
   },
+  {
+    path: 'doctor/historial/:pacienteId',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/doctor/historial-paciente/historial-paciente.component').then(m => m.HistorialPacienteComponent)
+  },
 
   /** Administrador */
   {

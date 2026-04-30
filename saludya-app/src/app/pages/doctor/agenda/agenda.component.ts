@@ -8,12 +8,8 @@ import { CitaService } from '../../../services/cita.service';
   selector: 'app-agenda',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  template: `
-
-  `,
-  styles: [`
-    
-  `]
+  templateUrl: './agenda.component.html',
+  styleUrls: ['./agenda.component.scss']
 })
 export class AgendaComponent implements OnInit {
   citas: any[] = [];
