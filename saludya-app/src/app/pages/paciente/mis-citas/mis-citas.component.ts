@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CitaService } from '../../../services/cita.service';
@@ -26,7 +26,10 @@ export class MisCitasComponent implements OnInit {
   cargandoHorariosEdit = false;
   errorEdit = '';
 
-  constructor(private citaService: CitaService) {}
+  constructor(
+    private citaService: CitaService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.cargarCitas();
@@ -41,8 +44,16 @@ export class MisCitasComponent implements OnInit {
   cargarCitas() {
     this.cargando = true;
     this.citaService.getMisCitas().subscribe({
-      next: (res) => { this.citas = res.citas; this.cargando = false; },
-      error: () => { this.cargando = false; }
+      next: (res) => {
+        this.citas = Array.isArray(res.citas) ? res.citas : [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.citas = [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
