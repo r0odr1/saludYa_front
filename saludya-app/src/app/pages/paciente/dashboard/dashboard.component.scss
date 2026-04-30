@@ -122,6 +122,9 @@
   display: flex;
   overflow: hidden;
   transition: var(--transition);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .cita-card:hover {

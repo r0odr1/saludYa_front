@@ -45,7 +45,13 @@
   </div>
 
   <div class="citas-list" *ngIf="!cargando && proximasCitas.length > 0">
-    <div class="cita-card animate-in" *ngFor="let cita of proximasCitas; let i = index" [style.animationDelay]="(i * 0.08) + 's'">
+    <a
+      class="cita-card animate-in"
+      *ngFor="let cita of proximasCitas; let i = index"
+      [routerLink]="['/paciente/mis-citas']"
+      [queryParams]="{ citaId: cita._id }"
+      [style.animationDelay]="(i * 0.08) + 's'"
+    >
       <div class="cita-color-bar" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
       <div class="cita-body">
         <div class="cita-content">
@@ -64,6 +70,6 @@
           </div>
         </div>
       </div>
-    </div>
+    </a>
   </div>
 </div>
