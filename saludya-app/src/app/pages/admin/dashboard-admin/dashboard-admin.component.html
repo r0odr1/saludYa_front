@@ -1,0 +1,36 @@
+<div class="page-wrapper">
+  <div class="welcome-banner admin">
+    <div class="welcome-text">
+      <h1>Panel de Administración</h1>
+      <p>Bienvenido, {{ auth.usuario()?.nombre }}</p>
+    </div>
+    <span class="welcome-emoji">⚙️</span>
+  </div>
+
+  <div class="admin-grid">
+    <a routerLink="/admin/doctores" class="admin-card">
+      <span class="admin-icon">👨‍⚕️</span>
+      <h3>Gestionar Doctores</h3>
+      <p>Registrar y administrar el equipo médico</p>
+      <span class="admin-count">{{ totalDoctores }} registrados</span>
+    </a>
+    <a routerLink="/admin/especialidades" class="admin-card">
+      <span class="admin-icon">🏥</span>
+      <h3>Especialidades</h3>
+      <p>Configurar servicios de fisioterapia</p>
+      <span class="admin-count">{{ totalEspecialidades }} activas</span>
+    </a>
+    <a routerLink="/admin/reportes" class="admin-card">
+      <span class="admin-icon">📊</span>
+      <h3>Reportes</h3>
+      <p>Estadísticas y métricas del consultorio</p>
+      <span class="admin-count">Ver reportes</span>
+    </a>
+    <a routerLink="/admin/usuarios" class="admin-card">
+      <span class="admin-icon">👥</span>
+      <h3>Usuarios</h3>
+      <p>Gestionar roles de usuarios</p>
+      <span class="admin-count">Cambiar roles</span>
+    </a>
+  </div>
+</div>

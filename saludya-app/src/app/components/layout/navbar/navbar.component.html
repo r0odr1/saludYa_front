@@ -1,0 +1,124 @@
+<nav class="navbar" *ngIf="auth.estaLogueado()">
+  <div class="nav-inner">
+    <a class="nav-brand" routerLink="/">
+      <span class="brand-icon">🏥</span>
+      <span class="brand-text">Salud<span class="brand-accent">Ya</span></span>
+    </a>
+
+    <div class="nav-links" [class.open]="menuOpen">
+      <!-- Paciente -->
+      <ng-container *ngIf="auth.esPaciente()">
+        <a routerLink="/paciente/dashboard" routerLinkActive="active" (click)="menuOpen = false"
+          >Inicio</a
+        >
+        <a
+          routerLink="/paciente/especialidades"
+          routerLinkActive="active"
+          (click)="menuOpen = false"
+          >Especialidades</a
+        >
+        <a routerLink="/paciente/mis-citas" routerLinkActive="active" (click)="menuOpen = false"
+          >Mis Citas</a
+        >
+      </ng-container>
+
+      <!-- Doctor -->
+      <ng-container *ngIf="auth.esDoctor()">
+        <a routerLink="/doctor/dashboard" routerLinkActive="active" (click)="menuOpen = false"
+          >Inicio</a
+        >
+        <a routerLink="/doctor/agenda" routerLinkActive="active" (click)="menuOpen = false"
+          >Mi Agenda</a
+        >
+      </ng-container>
+
+      <!-- Admin -->
+      <ng-container *ngIf="auth.esAdmin()">
+        <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="menuOpen = false"
+          >Panel</a
+        >
+        <a routerLink="/admin/doctores" routerLinkActive="active" (click)="menuOpen = false"
+          >Doctores</a
+        >
+        <a routerLink="/admin/especialidades" routerLinkActive="active" (click)="menuOpen = false"
+          >Especialidades</a
+        >
+        <a routerLink="/admin/usuarios" routerLinkActive="active" (click)="menuOpen = false"
+          >Usuarios</a
+        >
+        <a routerLink="/admin/reportes" routerLinkActive="active" (click)="menuOpen = false"
+          >Reportes</a
+        >
+      </ng-container>
+    </div>
+
+    <div class="nav-right">
+      <!-- Perfil + dropdown -->
+      <div class="profile-wrapper">
+        <div class="user-pill" (click)="toggleDropdown($event)" [class.active]="dropdownOpen">
+          <span class="user-avatar">{{ auth.usuario()?.nombre?.charAt(0) }}</span>
+          <div class="user-info">
+            <span class="user-name">{{ auth.usuario()?.nombre }}</span>
+            <span class="user-role">{{ auth.usuario()?.rol | titlecase }}</span>
+          </div>
+          <span class="dropdown-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
+        </div>
+
+        <!-- Dropdown menu -->
+        <div class="profile-dropdown" *ngIf="dropdownOpen" (click)="$event.stopPropagation()">
+          <div class="dropdown-header">
+            <span class="dropdown-avatar">{{ auth.usuario()?.nombre?.charAt(0) }}</span>
+            <div class="dropdown-user-info">
+              <span class="dropdown-welcome">Bienvenido</span>
+              <span class="dropdown-name">{{ auth.usuario()?.nombre }}</span>
+              <span class="dropdown-role">{{ auth.usuario()?.rol | titlecase }}</span>
+            </div>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <a class="dropdown-item" routerLink="/perfil" (click)="closeDropdown()">
+            <span class="dropdown-icon">👤</span> Mi Perfil
+          </a>
+
+          <a
+            *ngIf="auth.esPaciente()"
+            class="dropdown-item"
+            routerLink="/paciente/mis-citas"
+            (click)="closeDropdown()"
+          >
+            <span class="dropdown-icon">📅</span> Mis Citas
+          </a>
+
+          <a
+            *ngIf="auth.esDoctor()"
+            class="dropdown-item"
+            routerLink="/doctor/agenda"
+            (click)="closeDropdown()"
+          >
+            <span class="dropdown-icon">📅</span> Mi Agenda
+          </a>
+
+          <a
+            *ngIf="auth.esAdmin()"
+            class="dropdown-item"
+            routerLink="/admin/usuarios"
+            (click)="closeDropdown()"
+          >
+            <span class="dropdown-icon">👥</span> Usuarios
+          </a>
+
+          <div class="dropdown-divider"></div>
+
+          <a class="dropdown-item logout" (click)="onLogout()">
+            <span class="dropdown-icon">⏻</span> Cerrar Sesión
+          </a>
+        </div>
+      </div>
+
+      <button class="hamburger" (click)="menuOpen = !menuOpen" [class.active]="menuOpen">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
