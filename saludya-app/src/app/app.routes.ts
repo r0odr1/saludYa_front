@@ -58,12 +58,69 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/paciente/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
+  {
+    path: 'paciente/especialidades',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/paciente/especialidades/especialidades.component').then(m => m.EspecialidadesComponent)
+  },
+  {
+    path: 'paciente/agendar/:especialidadId',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/paciente/agendar-cita/agendar-cita.component').then(m => m.AgendarCitaComponent)
+  },
+  {
+    path: 'paciente/mis-citas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/paciente/mis-citas/mis-citas.component').then(m => m.MisCitasComponent)
+  },
+
+  /** Doctor */
+  {
+    path: 'doctor/dashboard',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/doctor/dashboard-doctor/dashboard-doctor.component').then(m => m.DashboardDoctorComponent)
+  },
+  {
+    path: 'doctor/agenda',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/doctor/agenda/agenda.component').then(m => m.AgendaComponent)
+  },
+  {
+    path: 'doctor/historial/:pacienteId',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/doctor/historial-paciente/historial-paciente.component').then(m => m.HistorialPacienteComponent)
+  },
 
   /** Administrador */
   {
     path: 'admin/dashboard',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/admin/dashboard-admin/dashboard-admin.component').then(m => m.DashboardAdminComponent)
+  },
+  {
+    path: 'admin/doctores',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/gestionar-doctores/gestionar-doctores.component').then(m => m.GestionarDoctoresComponent)
+  },
+  {
+    path: 'admin/especialidades',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/gestionar-especialidades/gestionar-especialidades.component').then(m => m.GestionarEspecialidadesComponent)
+  },
+  {
+    path: 'admin/reportes',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/reportes/reportes.component').then(m => m.ReportesComponent)
+  },
+  {
+    path: 'admin/usuarios',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/gestionar-usuarios/gestionar-usuarios.component').then(m => m.GestionarUsuariosComponent)
+  },
+  {
+    path: 'admin/citas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/admin/gestionar-citas/gestionar-citas.component').then(m => m.GestionarCitasComponent)
   },
 
   { path: '**', redirectTo: '/login' },

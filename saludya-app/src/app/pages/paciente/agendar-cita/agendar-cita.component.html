@@ -1,0 +1,132 @@
+<div class="page-wrapper">
+  <a routerLink="/paciente/especialidades" class="btn btn-ghost" style="margin-bottom:16px">← Volver a especialidades</a>
+
+  <div class="page-header">
+    <h1>Agendar Cita</h1>
+    <p *ngIf="especialidad">{{ especialidad.nombre }} · {{ especialidad.duracionMinutos }} min</p>
+  </div>
+
+  <div class="stepper">
+    <div class="step" [class.active]="paso >= 1" [class.done]="paso > 1">
+      <span class="step-num">{{ paso > 1 ? '✓' : '1' }}</span>
+      <span class="step-label">Doctor</span>
+    </div>
+    <div class="step-line" [class.active]="paso > 1"></div>
+    <div class="step" [class.active]="paso >= 2" [class.done]="paso > 2">
+      <span class="step-num">{{ paso > 2 ? '✓' : '2' }}</span>
+      <span class="step-label">Fecha</span>
+    </div>
+    <div class="step-line" [class.active]="paso > 2"></div>
+    <div class="step" [class.active]="paso >= 3" [class.done]="paso > 3">
+      <span class="step-num">{{ paso > 3 ? '✓' : '3' }}</span>
+      <span class="step-label">Horario</span>
+    </div>
+    <div class="step-line" [class.active]="paso > 3"></div>
+    <div class="step" [class.active]="paso >= 4" [class.done]="paso > 4">
+      <span class="step-num">{{ paso > 4 ? '✓' : '4' }}</span>
+      <span class="step-label">Confirmar</span>
+    </div>
+  </div>
+
+  <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
+  <div class="alert alert-success" *ngIf="exito">✅ {{ exito }}</div>
+
+  <div *ngIf="paso === 1" class="step-content animate-in">
+    <h2 class="step-title">Selecciona un doctor</h2>
+    <div *ngIf="cargandoDoctores" class="loading-wrapper"><div class="spinner"></div></div>
+    <div *ngIf="!cargandoDoctores && doctores.length === 0" class="empty-state">
+      <h3>No hay doctores disponibles para esta especialidad</h3>
+    </div>
+    <div class="doctor-grid" *ngIf="!cargandoDoctores">
+      <div
+        class="doctor-card"
+        *ngFor="let doc of doctores"
+        [class.selected]="doctorSeleccionado?._id === doc._id"
+        (click)="seleccionarDoctor(doc)"
+      >
+        <div class="doctor-avatar">{{ doc.usuario?.nombre?.charAt(0) }}</div>
+        <h4>{{ doc.usuario?.nombre }}</h4>
+        <p>{{ doc.usuario?.email }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="paso === 2" class="step-content animate-in">
+    <h2 class="step-title">Selecciona una fecha</h2>
+    <button class="btn btn-ghost btn-sm" (click)="paso = 1">← Cambiar doctor</button>
+    <div class="fecha-grid">
+      <div
+        class="fecha-card"
+        *ngFor="let f of fechasDisponibles"
+        [class.selected]="fechaSeleccionada === f.valor"
+        (click)="seleccionarFecha(f.valor)"
+      >
+        <span class="fecha-dia">{{ f.diaSemana }}</span>
+        <span class="fecha-num">{{ f.dia }}</span>
+        <span class="fecha-mes">{{ f.mes }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="paso === 3" class="step-content animate-in">
+    <h2 class="step-title">Selecciona un horario</h2>
+    <button class="btn btn-ghost btn-sm" (click)="paso = 2">← Cambiar fecha</button>
+    <div *ngIf="cargandoHorarios" class="loading-wrapper"><div class="spinner"></div></div>
+    <div *ngIf="!cargandoHorarios && mensajeDisponibilidad" class="empty-state">
+      <h3>{{ mensajeDisponibilidad }}</h3>
+      <p>Intenta con otra fecha</p>
+    </div>
+    <div class="horarios-grid" *ngIf="!cargandoHorarios && horarios.length > 0">
+      <button
+        class="horario-btn"
+        *ngFor="let h of horarios"
+        [class.selected]="horarioSeleccionado === h.inicio"
+        (click)="seleccionarHorario(h.inicio)"
+      >
+        {{ h.inicio }} - {{ h.fin }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="paso === 4" class="step-content animate-in">
+    <h2 class="step-title">Confirma tu cita</h2>
+    <div class="resumen-card">
+      <div class="resumen-item">
+        <span class="resumen-label">Especialidad</span>
+        <span class="resumen-value">{{ especialidad?.nombre }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="resumen-label">Doctor</span>
+        <span class="resumen-value">{{ doctorSeleccionado?.usuario?.nombre }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="resumen-label">Fecha</span>
+        <span class="resumen-value">{{ formatFechaCompleta(fechaSeleccionada) }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="resumen-label">Horario</span>
+        <span class="resumen-value highlight">{{ horarioSeleccionado }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="resumen-label">Duración</span>
+        <span class="resumen-value">{{ especialidad?.duracionMinutos }} minutos</span>
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" (click)="paso = 3">← Cambiar horario</button>
+      <button class="btn btn-primary btn-lg" (click)="confirmarCita()" [disabled]="agendando">
+        {{ agendando ? 'Agendando...' : '✓ Confirmar Cita' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="paso === 5" class="step-content animate-in success-screen">
+    <div class="success-icon">🎉</div>
+    <h2>¡Cita Agendada!</h2>
+    <p>Tu cita ha sido registrada exitosamente. Recibirás un recordatorio.</p>
+    <div class="success-actions">
+      <a routerLink="/paciente/mis-citas" class="btn btn-primary">Ver mis citas</a>
+      <a routerLink="/paciente/especialidades" class="btn btn-outline">Agendar otra</a>
+    </div>
+  </div>
+</div>

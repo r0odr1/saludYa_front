@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { CitaService } from '../../../services/cita.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,9 +15,31 @@ export class DashboardComponent implements OnInit {
   proximasCitas: any[] = [];
   cargando = true;
 
-  constructor(public auth: AuthService) {}
+  constructor(
+    public auth: AuthService,
+    private citaService: CitaService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.cargarCitas();
+  }
+
+  cargarCitas() {
+    this.cargando = true;
+    this.citaService.getMisCitas().subscribe({
+      next: (res) => {
+        this.proximasCitas = Array.isArray(res.citas) ? res.citas.filter((c: any) => c.estado === 'agendada') : [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.proximasCitas = [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   get nombreUsuario(): string {
     return this.auth.usuario()!.nombre!.split(' ')[0];
