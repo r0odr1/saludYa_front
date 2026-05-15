@@ -1,0 +1,69 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Gestión de Especialidades</h1>
+    <button class="btn btn-primary" (click)="mostrarForm = !mostrarForm">
+      {{ mostrarForm ? '✕ Cerrar' : '+ Nueva Especialidad' }}
+    </button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="mensaje">✅ {{ mensaje }}</div>
+  <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
+
+  <!-- Formulario -->
+  <div class="card-flat form-section animate-in" *ngIf="mostrarForm">
+    <h3 style="margin-bottom:16px">{{ editandoId ? 'Editar' : 'Nueva' }} Especialidad</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input class="form-control" [(ngModel)]="form.nombre" placeholder="Ej: Electroterapia">
+      </div>
+      <div class="form-group">
+        <label>Duración (minutos)</label>
+        <input class="form-control" [(ngModel)]="form.duracionMinutos" type="number" min="15" step="5">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Descripción</label>
+        <input class="form-control" [(ngModel)]="form.descripcion" placeholder="Breve descripción del servicio">
+      </div>
+      <div class="form-group">
+        <label>Color (calendario)</label>
+        <div class="color-picker-row">
+          <input type="color" [(ngModel)]="form.color" class="color-input">
+          <span class="color-preview" [style.background]="form.color">{{ form.color }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" (click)="cancelarEdicion()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="procesando">
+        {{ procesando ? 'Guardando...' : (editandoId ? 'Actualizar' : 'Crear') }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <div class="esp-list" *ngIf="!cargando">
+    <div class="esp-item animate-in" *ngFor="let esp of especialidades || []; let i = index" [style.animation-delay]="(i*0.06)+'s'">
+      <div class="esp-color" [style.background]="esp.color"></div>
+      <div class="esp-info">
+        <h4>{{ esp.nombre }}</h4>
+        <p>{{ esp.descripcion }}</p>
+        <span class="esp-meta">⏱ {{ esp.duracionMinutos }} min</span>
+      </div>
+      <div class="esp-actions">
+        <button class="btn btn-ghost btn-sm" (click)="editar(esp)">✏️ Editar</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--color-danger)" (click)="eliminar(esp)">🗑️ Desactivar</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!cargando && especialidades.length === 0" class="empty-state">
+    <div class="icon">🏥</div>
+    <h3>No hay especialidades registradas</h3>
+    <p>Crea la primera especialidad para comenzar</p>
+  </div>
+</div>

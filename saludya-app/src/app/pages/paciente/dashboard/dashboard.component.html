@@ -1,89 +1,75 @@
 <div class="page-wrapper">
-      <div class="welcome-banner">
-        <div class="welcome-text">
-          <h1>¡Hola, {{ nombreUsuario }}!</h1>
-          <p>Bienvenido de vuelta a SaludYa. ¿En qué podemos ayudarte hoy?</p>
-        </div>
-        <span class="welcome-emoji">👋</span>
-      </div>
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h1>¡Hola, {{ nombreUsuario }}!</h1>
+      <p>Bienvenido de vuelta a SaludYa. ¿En qué podemos ayudarte hoy?</p>
+    </div>
+    <span class="welcome-emoji">👋</span>
+  </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">📅</div>
-          <div class="stat-content">
-            <div class="stat-number">{{ proximasCitas.length }}</div>
-            <div class="stat-label">Citas próximas</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">✅</div>
-          <div class="stat-content">
-            <div class="stat-number">12</div>
-            <div class="stat-label">Citas completadas</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⭐</div>
-          <div class="stat-content">
-            <div class="stat-number">4.8</div>
-            <div class="stat-label">Calificación promedio</div>
-          </div>
-        </div>
+  <div class="quick-actions">
+    <a routerLink="/paciente/especialidades" class="action-card action-primary">
+      <div>
+        <div class="action-icon">🩺</div>
+        <h3>Agendar cita</h3>
+        <p>Selecciona una especialidad y reserva tu horario.</p>
       </div>
+      <span class="action-arrow">→</span>
+    </a>
 
-      <div class="section-header">
-        <h2>Próximas citas</h2>
-        <a routerLink="/paciente/mis-citas" class="ver-todas">Ver todas →</a>
+    <a routerLink="/paciente/mis-citas" class="action-card action-secondary">
+      <div>
+        <div class="action-icon">📅</div>
+        <h3>Mis citas</h3>
+        <p>Consulta, edita o cancela tus citas agendadas.</p>
       </div>
+      <span class="action-arrow">→</span>
+    </a>
+  </div>
 
-      <div *ngIf="cargando" class="loading-wrapper">
-        <div class="spinner"></div>
-        <p>Cargando tus citas...</p>
-      </div>
+  <div class="section-header">
+    <h2>Próximas citas</h2>
+    <a routerLink="/paciente/mis-citas" class="ver-todas">Ver todas →</a>
+  </div>
 
-      <div *ngIf="!cargando && proximasCitas.length === 0" class="empty-state">
-        <div class="icon">📋</div>
-        <h3>No tienes citas próximas</h3>
-        <p>Agenda tu primera cita seleccionando una especialidad</p>
-        <a routerLink="/paciente/especialidades" class="btn btn-primary" style="margin-top:16px">Agendar ahora</a>
-      </div>
+  <div *ngIf="cargando" class="loading-wrapper">
+    <div class="spinner"></div>
+    <p>Cargando tus citas...</p>
+  </div>
 
-      <div class="citas-list" *ngIf="!cargando && proximasCitas.length > 0">
-        <div class="cita-card animate-in" *ngFor="let cita of proximasCitas; let i = index" [style.animation-delay]="(i * 0.08) + 's'">
-          <div class="cita-color-bar" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
-          <div class="cita-body">
-            <div class="cita-top">
-              <span class="badge badge-success">{{ cita.estado | titlecase }}</span>
-              <span class="cita-fecha">📅 {{ formatFecha(cita.fecha) }}</span>
-            </div>
-            <h4>{{ cita.especialidad?.nombre }}</h4>
-            <p class="cita-doctor">👨‍⚕️ {{ cita.doctor?.usuario?.nombre }}</p>
-            <p class="cita-hora">🕐 {{ cita.horaInicio }} - {{ cita.horaFin }}</p>
+  <div *ngIf="!cargando && proximasCitas.length === 0" class="empty-state">
+    <div class="icon">📋</div>
+    <h3>No tienes citas próximas</h3>
+    <p>Agenda tu primera cita seleccionando una especialidad.</p>
+    <a routerLink="/paciente/especialidades" class="btn btn-primary" style="margin-top: 16px;">Agendar ahora</a>
+  </div>
+
+  <div class="citas-list" *ngIf="!cargando && proximasCitas.length > 0">
+    <a
+      class="cita-card animate-in"
+      *ngFor="let cita of proximasCitas; let i = index"
+      [routerLink]="['/paciente/mis-citas']"
+      [queryParams]="{ citaId: cita._id }"
+      [style.animationDelay]="(i * 0.08) + 's'"
+    >
+      <div class="cita-color-bar" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
+      <div class="cita-body">
+        <div class="cita-content">
+
+          <!-- IZQUIERDA -->
+          <div class="cita-left">
+            <span class="badge">{{ cita.estado | titlecase }}</span>
+            <h3>{{ cita.especialidad?.nombre }}</h3>
+            <p class="cita-doctor">Dr. {{ cita.doctor?.usuario?.nombre }}</p>
           </div>
-      <div class="section-header">
-        <h2>Actividad reciente</h2>
-      </div>
 
-      <div class="activity-list">
-        <div class="activity-item">
-          <div class="activity-icon">📅</div>
-          <div class="activity-content">
-            <p><strong>Cita agendada</strong> - Cardiología con Dr. María González</p>
-            <span class="activity-time">Hace 2 días</span>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-icon">✅</div>
-          <div class="activity-content">
-            <p><strong>Cita completada</strong> - Medicina General</p>
-            <span class="activity-time">Hace 1 semana</span>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-icon">📋</div>
-          <div class="activity-content">
-            <p><strong>Perfil actualizado</strong> - Información personal modificada</p>
-            <span class="activity-time">Hace 2 semanas</span>
+          <!-- DERECHA -->
+          <div class="cita-datetime">
+            <span class="cita-fecha">📅 {{ formatFecha(cita.fecha) }}</span>
+            <span class="cita-time">🕐 {{ cita.horaInicio }} - {{ cita.horaFin }}</span>
           </div>
         </div>
       </div>
+    </a>
+  </div>
+</div>

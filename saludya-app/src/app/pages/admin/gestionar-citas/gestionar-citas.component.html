@@ -1,0 +1,130 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <h1>Gestión de citas</h1>
+      <p>Administra todas las citas del consultorio</p>
+    </div>
+  </div>
+
+  <div class="alert alert-success" *ngIf="mensaje">✅ {{ mensaje }}</div>
+  <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" class="form-control" [(ngModel)]="filtroFecha" (change)="cargar()">
+    </div>
+    <div class="form-group">
+      <label>Estado</label>
+      <select class="form-control" [(ngModel)]="filtroEstado" (change)="cargar()">
+        <option value="">Todos</option>
+        <option value="agendada">Agendadas</option>
+        <option value="completada">Completadas</option>
+        <option value="cancelada">Canceladas</option>
+        <option value="no_asistio">No asistió</option>
+      </select>
+    </div>
+    <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">Limpiar filtros</button>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <!-- Lista de Citas -->
+  <div *ngIf="!cargando">
+    <div class="stats-row">
+      <div class="stat-mini">📅 {{ citas.length }} citas encontradas</div>
+    </div>
+
+    <div class="cita-card" *ngFor="let c of citas">
+      <div class="cita-color-bar" [style.background]="c.especialidad?.color || '#6B7280'"></div>
+      <div class="cita-body">
+        <div class="cita-top">
+          <div class="cita-info">
+            <span class="cita-especialidad">{{ c.especialidad?.nombre || 'Sin especialidad' }}</span>
+            <span class="cita-badge" [ngClass]="'badge-' + c.estado">{{ c.estado | titlecase }}</span>
+          </div>
+          <div class="cita-actions">
+            <button class="btn btn-ghost btn-sm" (click)="abrirEditar(c)" *ngIf="c.estado === 'agendada'" title="Editar">✏️</button>
+            <button class="btn btn-ghost btn-sm btn-danger-text" (click)="abrirEliminar(c)" title="Eliminar">🗑️</button>
+          </div>
+        </div>
+        <div class="cita-detalles">
+          <span>🧑 {{ c.paciente?.nombre || 'N/A' }} · {{ c.paciente?.email }}</span>
+          <span>👨‍⚕️ {{ c.doctor?.usuario?.nombre || 'N/A' }}</span>
+          <span>📅 {{ formatFecha(c.fecha) }} · 🕐 {{ c.horaInicio }} - {{ c.horaFin }}</span>
+        </div>
+        <div class="cita-notas" *ngIf="c.notas?.length > 0">
+          <div class="nota" *ngFor="let n of c.notas">
+            <span class="nota-doctor">📝 {{ n.doctor?.nombre || 'Doctor' }}:</span>
+            <span class="nota-contenido">{{ n.contenido }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="citas.length === 0" style="padding:60px;text-align:center">
+      <h3>No se encontraron citas</h3>
+      <p>Ajusta los filtros para ver resultados</p>
+    </div>
+  </div>
+
+  <!-- Modal Editar Citas -->
+  <div class="modal-backdrop" *ngIf="modalEditar" (click)="modalEditar = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Editar cita (Admin)</h3>
+        <button class="btn btn-ghost btn-sm" (click)="modalEditar = false">✕</button>
+      </div>
+      <div class="cita-resumen">
+        <p>🧑 <strong>{{ citaSeleccionada?.paciente?.nombre }}</strong> · {{ citaSeleccionada?.especialidad?.nombre }}</p>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" class="form-control" [(ngModel)]="editarCitaDatos.fecha">
+        </div>
+        <div class="form-group">
+          <label>Hora inicio</label>
+          <input type="time" class="form-control" [(ngModel)]="editarCitaDatos.horaInicio">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select class="form-control" [(ngModel)]="editarCitaDatos.estado">
+          <option value="agendada">Agendada</option>
+          <option value="completada">Completada</option>
+          <option value="cancelada">Cancelada</option>
+          <option value="no_asistio">No asistió</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="modalEditar = false">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarEditarCita()" [disabled]="procesando">
+          {{ procesando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Eliminar Citas -->
+  <div class="modal-backdrop" *ngIf="modalEliminar" (click)="modalEliminar = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Eliminar cita</h3>
+        <button class="btn btn-ghost btn-sm" (click)="modalEliminar = false">✕</button>
+      </div>
+      <div class="cita-resumen">
+        <p>🧑 <strong>{{ citaSeleccionada?.paciente?.nombre }}</strong></p>
+        <p>{{ citaSeleccionada?.especialidad?.nombre }} · {{ formatFecha(citaSeleccionada?.fecha) }} · {{ citaSeleccionada?.horaInicio }}</p>
+      </div>
+      <p class="confirm-text">¿Estás seguro de eliminar esta cita permanentemente? Esta acción no se puede deshacer.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="modalEliminar = false">Cancelar</button>
+        <button class="btn btn-danger" (click)="confirmarEliminarCita()" [disabled]="procesando">
+          {{ procesando ? 'Eliminando...' : 'Sí, eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
