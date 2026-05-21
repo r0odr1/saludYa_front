@@ -481,4 +481,181 @@ describe('AuthService', () => {
       expect(routerMock.navigate).toHaveBeenCalledWith(['/paciente/dashboard']);
     });
   });
+
+    it('esAdmin() debe retornar true para admin', () => {
+    localStorage.setItem('sy_token', 'token');
+
+    localStorage.setItem('sy_usuario', JSON.stringify({
+      _id: '1',
+      nombre: 'Admin',
+      email: 'admin@test.com',
+      telefono: '300',
+      rol: 'admin',
+      cuentaVerificada: true,
+    }));
+
+    TestBed.resetTestingModule();
+
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        AuthService,
+        {
+          provide: Router,
+          useValue: routerMock,
+        },
+      ],
+    });
+
+    const nuevoService = TestBed.inject(AuthService);
+
+    expect(nuevoService.esAdmin()).toBe(true);
+  });
+
+  it('esDoctor() debe retornar true para doctor', () => {
+    localStorage.setItem('sy_token', 'token');
+
+    localStorage.setItem('sy_usuario', JSON.stringify({
+      _id: '1',
+      nombre: 'Doctor',
+      email: 'doctor@test.com',
+      telefono: '300',
+      rol: 'doctor',
+      cuentaVerificada: true,
+    }));
+
+    TestBed.resetTestingModule();
+
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        AuthService,
+        {
+          provide: Router,
+          useValue: routerMock,
+        },
+      ],
+    });
+
+    const nuevoService = TestBed.inject(AuthService);
+
+    expect(nuevoService.esDoctor()).toBe(true);
+  });
+
+  it('rol() debe retornar el rol actual', () => {
+    localStorage.setItem('sy_token', 'token');
+
+    localStorage.setItem('sy_usuario', JSON.stringify({
+      _id: '1',
+      nombre: 'Doctor',
+      email: 'doctor@test.com',
+      telefono: '300',
+      rol: 'doctor',
+      cuentaVerificada: true,
+    }));
+
+    TestBed.resetTestingModule();
+
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        AuthService,
+        {
+          provide: Router,
+          useValue: routerMock,
+        },
+      ],
+    });
+
+    const nuevoService = TestBed.inject(AuthService);
+
+    expect(nuevoService.rol()).toBe('doctor');
+  });
+
+  it('debe ejecutar logout si el usuario en localStorage es inválido', () => {
+    localStorage.setItem('sy_token', 'token');
+    localStorage.setItem('sy_usuario', 'json-invalido');
+
+    TestBed.resetTestingModule();
+
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        AuthService,
+        {
+          provide: Router,
+          useValue: routerMock,
+        },
+      ],
+    });
+
+    const nuevoService = TestBed.inject(AuthService);
+
+    expect(nuevoService.usuario()).toBeNull();
+
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('NO debe guardar email pendiente si el backend no envía email', () => {
+    service.registro({
+      nombre: 'Juan',
+      email: 'juan@test.com',
+      password: 'Test1234!',
+      telefono: '3001234567',
+    }).subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/registro`);
+
+    req.flush({
+      requiereVerificacion: true,
+    });
+
+    expect(service.emailPendiente()).toBe('');
+  });
+
+  it('NO debe guardar sesión si no llegan token y usuario', () => {
+    service
+      .verificarCuenta('test@test.com', '123456')
+      .subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/verificar-cuenta`);
+
+    req.flush({
+      mensaje: 'Verificación incompleta',
+    });
+
+    expect(service.estaLogueado()).toBe(false);
+
+    expect(service.usuario()).toBeNull();
+
+    expect(localStorage.getItem('sy_token')).toBeNull();
+  });
+
+  it('NO debe guardar sesión si login no retorna token ni usuario', () => {
+    service.login('test@test.com', 'Test1234!').subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/login`);
+
+    req.flush({
+      mensaje: 'Respuesta incompleta',
+    });
+
+    expect(service.estaLogueado()).toBe(false);
+
+    expect(service.usuario()).toBeNull();
+
+    expect(localStorage.getItem('sy_token')).toBeNull();
+  });
+
+  it('NO debe guardar email pendiente si reset no retorna email', () => {
+    service.solicitarReset('test@test.com').subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/solicitar-reset`);
+
+    req.flush({
+      mensaje: 'Correo enviado',
+    });
+
+    expect(service.emailPendiente()).toBe('');
+  });
 });
