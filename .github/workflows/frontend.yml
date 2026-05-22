@@ -1,0 +1,101 @@
+name: SaludYa Frontend — CI
+
+# ============================================================
+# CUÁNDO SE EJECUTA
+# ============================================================
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - test
+  pull_request:
+    branches:
+      - main
+      - dev
+
+# ============================================================
+# JOBS
+# ============================================================
+jobs:
+
+  # ----------------------------------------------------------
+  # JOB 1: Pruebas unitarias
+  # Se ejecuta en TODAS las ramas
+  # ----------------------------------------------------------
+  test:
+    name: 🧪 Pruebas unitarias
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout del código
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: saludya-app/package-lock.json
+
+      - name: 📦 Instalar dependencias
+        working-directory: saludya-app
+        run: npm ci
+
+      - name: 🧪 Correr pruebas con cobertura
+        working-directory: saludya-app
+        run: npm run test:coverage -- --passWithNoTests
+
+      - name: 📊 Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-frontend-${{ github.ref_name }}
+          path: saludya-app/coverage/
+          retention-days: 7
+
+  # ----------------------------------------------------------
+  # JOB 2: Build de producción
+  # Solo se ejecuta en main y dev (después de que pasen las pruebas)
+  # ----------------------------------------------------------
+  build:
+    name: 🏗️ Build Angular
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+
+    steps:
+      - name: 📥 Checkout del código
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: saludya-app/package-lock.json
+
+      - name: 📦 Instalar dependencias
+        working-directory: saludya-app
+        run: npm ci
+
+      - name: 🏗️ Build producción
+        working-directory: saludya-app
+        run: npm run build -- --configuration=production
+
+      - name: 📦 Subir artefacto del build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-frontend-${{ github.ref_name }}
+          path: saludya-app/dist/
+          retention-days: 7
+
+      - name: ✅ Verificar que el build generó archivos
+        working-directory: saludya-app
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ La carpeta dist no fue generada"
+            exit 1
+          fi
+          echo "✅ Build generado correctamente"
+          ls -la dist/
