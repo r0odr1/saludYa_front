@@ -1,0 +1,205 @@
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filtro-btn {
+  padding: 8px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: var(--transition);
+  cursor: pointer;
+  color: var(--color-text-light);
+}
+
+.filtro-btn:hover {
+  border-color: var(--color-primary-light);
+}
+
+.filtro-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.citas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cita-item {
+  background: white;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: flex;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.cita-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.cita-bar {
+  width: 5px;
+  flex-shrink: 0;
+}
+
+.cita-content {
+  padding: 20px;
+  flex: 1;
+}
+
+.cita-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.cita-header h3 {
+  font-size: 1.05rem;
+  margin-bottom: 2px;
+}
+
+.cita-doc {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+.cita-details {
+  display: flex;
+  gap: 20px;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.cita-notas {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+.cita-notas h5 {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 8px;
+}
+
+.nota {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+}
+
+.nota p {
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+
+.nota small {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.cita-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.restriccion-aviso {
+  font-size: 0.82rem;
+  color: var(--color-warning);
+  font-weight: 500;
+}
+
+.edit-fecha-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.fecha-mini {
+  text-align: center;
+  padding: 8px 4px;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.8rem;
+}
+
+.fecha-mini:hover {
+  border-color: var(--color-primary-light);
+}
+
+.fecha-mini.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-lighter);
+}
+
+.fecha-mini span {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.fecha-mini strong {
+  font-size: 1.1rem;
+}
+
+.edit-horarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.horario-mini {
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: white;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.horario-mini:hover {
+  border-color: var(--color-primary-light);
+}
+
+.horario-mini.selected {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.modal-description {
+  margin-bottom: 16px;
+  color: var(--color-text-light);
+}
+
+.modal-note {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-top: 8px;
+}
+
+.cita-highlight {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  transform: scale(1.01);
+}

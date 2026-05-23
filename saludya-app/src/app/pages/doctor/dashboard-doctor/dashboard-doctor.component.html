@@ -1,0 +1,65 @@
+<div class="page-wrapper">
+  <div class="welcome-banner doctor">
+    <div class="welcome-text">
+      <h1>Dr(a). {{ auth.usuario()?.nombre?.split(' ')?.slice(1)?.join(' ') || auth.usuario()?.nombre }}</h1>
+      <p>Panel de control · {{ hoy }}</p>
+    </div>
+    <span class="welcome-emoji">👨‍⚕️</span>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#d1e7dd;color:#0f5132">📅</div>
+      <div class="stat-info">
+        <h4>Hoy</h4>
+        <div class="stat-number">{{ citasHoy }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#cff4fc;color:#055160">✅</div>
+      <div class="stat-info">
+        <h4>Completadas</h4>
+        <div class="stat-number">{{ completadas }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fcefc7;color:#92600a">⏳</div>
+      <div class="stat-info">
+        <h4>Pendientes</h4>
+        <div class="stat-number">{{ pendientes }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Citas de hoy</h2>
+    <a routerLink="/doctor/agenda" class="btn btn-outline btn-sm">Ver agenda completa →</a>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <div *ngIf="!cargando && citasDelDia.length === 0" class="empty-state">
+    <div class="icon">🎉</div>
+    <h3>No tienes citas programadas para hoy</h3>
+  </div>
+
+  <div class="citas-list" *ngIf="!cargando">
+    <div class="cita-item animate-in" *ngFor="let cita of citasDelDia; let i = index" [style.animation-delay]="(i*0.06)+'s'">
+      <div class="cita-time">
+        <span class="time-start">{{ cita.horaInicio }}</span>
+        <span class="time-end">{{ cita.horaFin }}</span>
+      </div>
+      <div class="cita-bar" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
+      <div class="cita-info">
+        <div class="cita-top-row">
+          <h4>{{ cita.paciente?.nombre }}</h4>
+          <span class="badge" [ngClass]="{'badge-success': cita.estado==='agendada', 'badge-info': cita.estado==='completada'}">
+            {{ cita.estado | titlecase }}
+          </span>
+        </div>
+        <p>{{ cita.especialidad?.nombre }}</p>
+        <p class="contact">📧 {{ cita.paciente?.email }} · 📱 {{ cita.paciente?.telefono }}</p>
+      </div>
+    </div>
+  </div>
+</div>

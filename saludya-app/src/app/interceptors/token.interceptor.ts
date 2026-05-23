@@ -9,7 +9,8 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = authService.obtenerToken();
 
-  if (token) {
+  // Solo agregar token si existe y no es una petición de autenticación
+  if (token && !req.url.includes('/auth/')) {
     req = req.clone({
       setHeaders: { Authorization: `Bearer ${token}` }
     });

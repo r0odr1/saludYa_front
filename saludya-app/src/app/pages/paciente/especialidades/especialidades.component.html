@@ -1,0 +1,41 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1>Especialidades</h1>
+    <p>Selecciona el servicio que necesitas para agendar tu cita</p>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper">
+    <div class="spinner"></div>
+    <p>Cargando especialidades...</p>
+  </div>
+
+  <div *ngIf="!cargando && error" class="empty-state error-state">
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!cargando && !error && especialidades.length === 0" class="empty-state">
+    <p>No se encontraron especialidades en este momento.</p>
+  </div>
+
+  <div class="especialidades-grid" *ngIf="!cargando && !error && especialidades.length > 0">
+    <div
+      class="esp-card animate-in"
+      *ngFor="let esp of especialidades; let i = index"
+      [style.animation-delay]="(i * 0.08) + 's'"
+    >
+      <div class="esp-icon-wrapper" [style.background]="esp.color + '18'">
+        <span class="esp-icon" [style.color]="esp.color">{{ getIcon(esp.nombre) }}</span>
+      </div>
+      <div class="esp-info">
+        <h3>{{ esp.nombre }}</h3>
+        <p>{{ esp.descripcion }}</p>
+        <div class="esp-meta">
+          <span class="esp-duration">⏱ {{ esp.duracionMinutos }} min</span>
+        </div>
+      </div>
+      <a [routerLink]="['/paciente/agendar', esp._id]" class="btn btn-primary btn-sm">
+        Agendar →
+      </a>
+    </div>
+  </div>
+</div>

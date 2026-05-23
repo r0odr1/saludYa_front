@@ -1,0 +1,201 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <h1>Gestión de usuarios</h1>
+      <p>Busca, crea, edita y gestiona roles de usuarios</p>
+    </div>
+    <button class="btn btn-primary" (click)="abrirCrear()">+ Nuevo usuario</button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="mensaje">✅ {{ mensaje }}</div>
+  <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
+
+  <!-- Buscador y Filtros -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="form-control search-input" [(ngModel)]="busqueda" (input)="buscar()" placeholder="Buscar por nombre o correo...">
+    </div>
+    <div class="filtros">
+      <button *ngFor="let f of filtros" class="filtro-btn" [class.active]="filtroRol === f.value" (click)="filtroRol = f.value; cargar()">{{ f.label }}</button>
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="loading-wrapper"><div class="spinner"></div></div>
+
+  <!-- Tabla de usuarios -->
+  <div class="table-card" *ngIf="!cargando">
+    <div class="table-header">
+      <span class="col-name">Nombre</span>
+      <span class="col-email">Email</span>
+      <span class="col-rol">Rol</span>
+      <span class="col-estado">Estado</span>
+      <span class="col-acciones">Acciones</span>
+    </div>
+    <div class="table-row" *ngFor="let u of usuarios">
+      <div class="col-name">
+        <div class="user-avatar" [style.background]="getAvatarColor(u.rol)">{{ u.nombre?.charAt(0)?.toUpperCase() }}</div>
+        <div>
+          <span class="user-name-text">{{ u.nombre }}</span>
+          <span class="user-phone" *ngIf="u.telefono">📱 {{ u.telefono }}</span>
+        </div>
+      </div>
+      <span class="col-email">{{ u.email }}</span>
+      <span class="col-rol">
+        <span class="badge-rol" [ngClass]="'badge-' + u.rol">{{ u.rol | titlecase }}</span>
+      </span>
+      <span class="col-estado">
+        <span class="badge-estado" [class.verificado]="u.cuentaVerificada" [class.inactivo]="!u.activo">
+          {{ !u.activo ? 'Inactivo' : u.cuentaVerificada ? 'Verificado' : 'Sin verificar' }}
+        </span>
+      </span>
+      <span class="col-acciones">
+        <div class="acciones-btns" *ngIf="u.rol !== 'admin'">
+          <button class="btn btn-ghost btn-sm" (click)="abrirEditar(u)" title="Editar">✏️</button>
+          <button class="btn btn-ghost btn-sm" (click)="abrirCambiarRol(u)" title="Cambiar rol">🔄</button>
+          <button class="btn btn-ghost btn-sm btn-danger-text" (click)="abrirEliminar(u)" title="Desactivar" *ngIf="u.activo">🗑️</button>
+        </div>
+      </span>
+    </div>
+    <div class="empty-state" *ngIf="usuarios.length === 0" style="padding:40px;text-align:center">
+      <p>No se encontraron usuarios</p>
+    </div>
+  </div>
+
+  <!-- Modal Crear Usuario -->
+  <div class="modal-backdrop" *ngIf="modalCrear" (click)="modalCrear = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Nuevo usuario</h3>
+        <button class="btn btn-ghost btn-sm" (click)="modalCrear = false">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Nombre completo *</label>
+        <input type="text" class="form-control" [(ngModel)]="nuevoUsuario.nombre" placeholder="Ej: Juan Pérez">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Correo electrónico *</label>
+          <input type="email" class="form-control" [(ngModel)]="nuevoUsuario.email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" class="form-control" [(ngModel)]="nuevoUsuario.telefono" placeholder="300 123 4567">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contraseña *</label>
+          <input type="password" class="form-control" [(ngModel)]="nuevoUsuario.password" placeholder="Mín. 8 caracteres">
+        </div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select class="form-control" [(ngModel)]="nuevoUsuario.rol">
+            <option value="paciente">Paciente</option>
+            <option value="doctor">Doctor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="role-warning" *ngIf="nuevoUsuario.rol === 'doctor'">
+        <p>⚠️ Al crear como Doctor, se generará automáticamente su perfil profesional. Luego asigna especialidades y horarios desde la sección de Doctores.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="modalCrear = false">Cancelar</button>
+        <button class="btn btn-primary" (click)="crearUsuario()" [disabled]="procesando || !nuevoUsuario.nombre || !nuevoUsuario.email || !nuevoUsuario.password">
+          {{ procesando ? 'Creando...' : 'Crear usuario' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Usuario -->
+  <div class="modal-backdrop" *ngIf="modalEditar" (click)="modalEditar = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Editar usuario</h3>
+        <button class="btn btn-ghost btn-sm" (click)="modalEditar = false">✕</button>
+      </div>
+      <div class="modal-user-info">
+        <div class="user-avatar-lg" [style.background]="getAvatarColor(usuarioSeleccionado?.rol)">{{ usuarioSeleccionado?.nombre?.charAt(0)?.toUpperCase() }}</div>
+        <div>
+          <h4>{{ usuarioSeleccionado?.email }}</h4>
+          <p>Rol: <strong>{{ usuarioSeleccionado?.rol | titlecase }}</strong></p>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" class="form-control" [(ngModel)]="editarDatos.nombre">
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" class="form-control" [(ngModel)]="editarDatos.telefono">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="modalEditar = false">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarEditar()" [disabled]="procesando">
+          {{ procesando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Cambiar Rol -->
+  <div class="modal-backdrop" *ngIf="modalRol" (click)="modalRol = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Cambiar rol de usuario</h3>
+        <button class="btn btn-ghost btn-sm" (click)="modalRol = false">✕</button>
+      </div>
+      <div class="modal-user-info">
+        <div class="user-avatar-lg" [style.background]="getAvatarColor(usuarioSeleccionado?.rol)">{{ usuarioSeleccionado?.nombre?.charAt(0)?.toUpperCase() }}</div>
+        <div>
+          <h4>{{ usuarioSeleccionado?.nombre }}</h4>
+          <p>{{ usuarioSeleccionado?.email }} · Rol actual: <strong>{{ usuarioSeleccionado?.rol | titlecase }}</strong></p>
+        </div>
+      </div>
+      <label class="role-label">Nuevo rol</label>
+      <div class="role-options">
+        <div *ngFor="let op of rolesOpciones" class="role-option" [class.selected]="nuevoRol === op.value" (click)="nuevoRol = op.value">
+          <span class="role-icon">{{ op.icon }}</span>
+          <span class="role-name">{{ op.label }}</span>
+        </div>
+      </div>
+      <div class="role-warning" *ngIf="nuevoRol === 'doctor'">
+        <p>⚠️ Al cambiar a <strong>Doctor</strong> se creará automáticamente su perfil profesional. Luego asigna especialidades y horarios desde Doctores.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="modalRol = false">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarCambioRol()" [disabled]="!nuevoRol || nuevoRol === usuarioSeleccionado?.rol || procesando">
+          {{ procesando ? 'Cambiando...' : 'Cambiar a ' + (nuevoRol | titlecase) }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Eliminar - Desactivar -->
+  <div class="modal-backdrop" *ngIf="modalEliminar" (click)="modalEliminar = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Desactivar usuario</h3>
+        <button class="btn btn-ghost btn-sm" (click)="modalEliminar = false">✕</button>
+      </div>
+      <div class="modal-user-info">
+        <div class="user-avatar-lg" [style.background]="getAvatarColor(usuarioSeleccionado?.rol)">{{ usuarioSeleccionado?.nombre?.charAt(0)?.toUpperCase() }}</div>
+        <div>
+          <h4>{{ usuarioSeleccionado?.nombre }}</h4>
+          <p>{{ usuarioSeleccionado?.email }}</p>
+        </div>
+      </div>
+      <p class="confirm-text">¿Estás seguro de desactivar este usuario? No podrá iniciar sesión hasta que un administrador lo reactive.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="modalEliminar = false">Cancelar</button>
+        <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="procesando">
+          {{ procesando ? 'Desactivando...' : 'Sí, desactivar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
