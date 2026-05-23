@@ -1,59 +1,151 @@
-# SaludyaApp
+# 🏥 SaludYa App — Guía de instalación y ejecución
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.1.
+Aplicación Angular 19 para la gestión de citas de fisioterapia.
 
-## Development server
+---
 
-To start a local development server, run:
+## ✅ Requisitos previos
+
+Antes de instalar, asegúrate de tener:
+
+| Herramienta | Versión mínima | Verificar |
+|---|---|---|
+| Node.js | 18.x o superior | `node -v` |
+| npm | 9.x o superior | `npm -v` |
+| Angular CLI | 17.x o superior | `ng version` |
+
+> Si no tienes Angular CLI instalado:
+> ```bash
+> npm install -g @angular/cli
+> ```
+
+---
+
+## 🚀 Instalación
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/r0odr1/saludYa_front.git
+cd saludYa_front/saludya-app
+```
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 3. Configurar el entorno
+
+Edita el archivo `src/environments/environment.ts` y asegúrate de que apunte al backend:
+
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3000/api'
+};
+```
+
+> ⚠️ El backend debe estar corriendo en `http://localhost:3000` antes de levantar el frontend.
+
+---
+
+## ▶️ Ejecución en desarrollo
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Abre el navegador en: **`http://localhost:4200`**
 
-## Code scaffolding
+La aplicación se recarga automáticamente al guardar cambios.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
+## 📁 Estructura del proyecto
+
+```
+saludya-app/
+├── src/
+│   ├── app/
+│   │   ├── components/layout/navbar/    # Navbar con dropdown de perfil
+│   │   ├── guards/                      # authGuard - protección de rutas
+│   │   ├── interceptors/                # tokenInterceptor - JWT automático
+│   │   ├── services/
+│   │   │   ├── auth.service.ts          # Login, registro, verificación
+│   │   │   ├── cita.service.ts          # Citas, disponibilidad, agenda
+│   │   │   └── admin.service.ts         # Doctores, especialidades, usuarios
+│   │   ├── pages/
+│   │   │   ├── login/
+│   │   │   ├── registro/
+│   │   │   ├── verificar-cuenta/        # Input 6 dígitos con auto-avance
+│   │   │   ├── solicitar-reset/
+│   │   │   ├── verificar-reset/
+│   │   │   ├── nueva-contrasena/
+│   │   │   ├── perfil/                  # Editar info + cambiar contraseña
+│   │   │   ├── paciente/
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── especialidades/
+│   │   │   │   ├── agendar-cita/        # Stepper 5 pasos
+│   │   │   │   └── mis-citas/           # Modal cancelar + restricción 3h
+│   │   │   ├── doctor/
+│   │   │   │   ├── dashboard-doctor/
+│   │   │   │   ├── agenda/              # Notas, reasignar, completar
+│   │   │   │   └── historial-paciente/
+│   │   │   └── admin/
+│   │   │       ├── dashboard-admin/
+│   │   │       ├── gestionar-doctores/
+│   │   │       ├── gestionar-especialidades/
+│   │   │       ├── gestionar-usuarios/  # Cambio de roles
+│   │   │       ├── gestionar-citas/
+│   │   │       └── reportes/
+│   │   ├── app.routes.ts                # 20+ rutas con lazy loading
+│   │   ├── app.component.ts
+│   │   └── app.config.ts
+│   ├── environments/
+│   │   ├── environment.ts               # Desarrollo (localhost:3000)
+│   │   └── environment.prod.ts          # Producción
+│   ├── styles.scss                      # Variables CSS globales + utilidades
+│   └── main.ts
+├── angular.json
+├── package.json
+└── tsconfig.json
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## 🏗️ Compilar para producción
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Los archivos compilados quedan en la carpeta `dist/`. Listos para desplegar en cualquier servidor estático (Nginx, Apache, Firebase Hosting, etc.).
 
-## Running unit tests
+---
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## 🧪 Ejecutar pruebas
 
 ```bash
+# Pruebas unitarias
 ng test
 ```
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## 🔗 Backend relacionado
 
-```bash
-ng e2e
+Este frontend consume la API REST del backend **SaludYa**:
+
+```
+https://github.com/r0odr1/saludYa_back
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Asegúrate de tener el backend corriendo antes de usar la app.
 
-## Additional Resources
+---
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 🐛 Problemas que se presentaran
+
+> ⚠️ Se generaran problemas ya que no estan las variables de entorno, es necesario solicitarlas.
