@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CitaService } from '../../../services/cita.service';
@@ -34,7 +34,8 @@ export class AgendarCitaComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private citaService: CitaService
+    private citaService: CitaService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -49,14 +50,19 @@ export class AgendarCitaComponent implements OnInit {
       next: (res) => {
         this.doctores = res.doctores;
         this.cargandoDoctores = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.cargandoDoctores = false; }
+      error: () => {
+        this.cargandoDoctores = false;
+        this.cdr.detectChanges();
+      }
     });
 
     //** Cargar tambien informacion de especialidad */
     this.citaService.getEspecialidades().subscribe({
       next: (res) => {
         this.especialidad = res.find((e: any) => e._id === this.especialidadId);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -104,10 +110,12 @@ export class AgendarCitaComponent implements OnInit {
           this.horarios = res.horarios;
         }
         this.cargandoHorarios = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.mensajeDisponibilidad = 'Error al cargar horarios';
         this.cargandoHorarios = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -130,6 +138,7 @@ export class AgendarCitaComponent implements OnInit {
       next: () => {
         this.agendando = false;
         this.paso = 5;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.agendando = false;
@@ -139,6 +148,7 @@ export class AgendarCitaComponent implements OnInit {
           this.paso = 3;
           this.cargarHorarios();
         }
+        this.cdr.detectChanges();
       }
     });
   }

@@ -20,7 +20,12 @@
   </div>
 
   <div class="citas-list" *ngIf="!cargando">
-    <div class="cita-item animate-in" *ngFor="let cita of citasFiltradas; let i = index" [style.animation-delay]="(i*0.06)+'s'">
+    <div
+      class="cita-item animate-in"
+      *ngFor="let cita of citasFiltradas; let i = index"
+      [class.cita-highlight]="cita._id === citaSeleccionadaId"
+      [style.animation-delay]="(i*0.06)+'s'"
+    >
       <div class="cita-bar" [style.background]="cita.especialidad?.color || '#4F46E5'"></div>
       <div class="cita-content">
         <div class="cita-header">

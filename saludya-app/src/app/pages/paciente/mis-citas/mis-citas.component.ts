@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CitaService } from '../../../services/cita.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-mis-citas',
@@ -26,9 +27,19 @@ export class MisCitasComponent implements OnInit {
   cargandoHorariosEdit = false;
   errorEdit = '';
 
-  constructor(private citaService: CitaService) {}
+  citaSeleccionadaId: string | null = null;
+
+  constructor(
+    private citaService: CitaService,
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.citaSeleccionadaId = params['citaId'] || null;
+    });
+
     this.cargarCitas();
     this.generarFechasEdit();
   }
@@ -41,9 +52,25 @@ export class MisCitasComponent implements OnInit {
   cargarCitas() {
     this.cargando = true;
     this.citaService.getMisCitas().subscribe({
-      next: (res) => { this.citas = res.citas; this.cargando = false; },
-      error: () => { this.cargando = false; }
+      next: (res) => {
+        this.citas = Array.isArray(res.citas) ? res.citas : [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+        this.scrollToSelected();
+      },
+      error: () => {
+        this.citas = [];
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
+  }
+
+  scrollToSelected() {
+    const el = document.querySelector('.cita-highlight');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   confirmarCancelar(cita: any) { this.citaCancelar = cita; }

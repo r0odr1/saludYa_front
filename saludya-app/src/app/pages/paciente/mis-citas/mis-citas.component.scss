@@ -197,3 +197,9 @@
   color: var(--color-text-light);
   margin-top: 8px;
 }
+
+.cita-highlight {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  transform: scale(1.01);
+}

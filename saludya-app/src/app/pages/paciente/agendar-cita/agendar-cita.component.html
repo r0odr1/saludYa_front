@@ -22,8 +22,8 @@
       <span class="step-label">Horario</span>
     </div>
     <div class="step-line" [class.active]="paso > 3"></div>
-    <div class="step" [class.active]="paso >= 4">
-      <span class="step-num">4</span>
+    <div class="step" [class.active]="paso >= 4" [class.done]="paso > 4">
+      <span class="step-num">{{ paso > 4 ? '✓' : '4' }}</span>
       <span class="step-label">Confirmar</span>
     </div>
   </div>
