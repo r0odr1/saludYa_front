@@ -231,9 +231,7 @@ describe('NuevaContrasenaComponent', () => {
 
       component.cambiarContrasena();
 
-      console.log('ANTES tick:', component.contadorRedireccion);
       tick(1000);
-      console.log('DESPUÉS tick:', component.contadorRedireccion);
 
       expect(component.contadorRedireccion).toBe(9);
       expect(component.progresoRedireccion).toBe(10);
@@ -244,9 +242,7 @@ describe('NuevaContrasenaComponent', () => {
 
       component.cambiarContrasena();
 
-      console.log('ANTES tick 10s:', component.contadorRedireccion);
       tick(10000);
-      console.log('DESPUÉS tick 10s:', component.contadorRedireccion);
 
       expect(routerMock.navigate).toHaveBeenCalledWith([
         '/login',
