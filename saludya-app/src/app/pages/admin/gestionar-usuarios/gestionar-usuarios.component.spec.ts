@@ -3,7 +3,7 @@
  * Pruebas del componente Gestionar Usuarios (admin).
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { GestionarUsuariosComponent } from './gestionar-usuarios.component';
@@ -196,5 +196,170 @@ describe('GestionarUsuariosComponent', () => {
     component.limpiarMensajes();
     expect(component.error).toBe('');
     expect(component.mensaje).toBe('');
+  });
+
+  it('debe manejar error al actualizar usuario', () => {
+    adminMock.actualizarUsuario.mockReturnValue(
+      throwError(() => ({ error: { mensaje: 'Error update' } }))
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+    component.editarDatos = { nombre: 'X', telefono: '123' };
+
+    component.confirmarEditar();
+
+    expect(component.procesando).toBe(false);
+    expect(component.error).toBe('Error update');
+  });
+
+  it('debe manejar error al cambiar rol', () => {
+    adminMock.cambiarRol.mockReturnValue(
+      throwError(() => ({ error: { mensaje: 'Error rol' } }))
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+    component.nuevoRol = 'doctor';
+
+    component.confirmarCambioRol();
+
+    expect(component.procesando).toBe(false);
+    expect(component.error).toBe('Error rol');
+  });
+
+  it('debe manejar error al eliminar usuario', () => {
+    adminMock.eliminarUsuario.mockReturnValue(
+      throwError(() => ({ error: { mensaje: 'Error eliminar' } }))
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+
+    component.confirmarEliminar();
+
+    expect(component.procesando).toBe(false);
+    expect(component.error).toBe('Error eliminar');
+  });
+
+  it('debe limpiar mensaje después de timeout', fakeAsync(() => {
+    component.mostrarMensaje('Hola');
+
+    expect(component.mensaje).toBe('Hola');
+
+    tick(4000);
+
+    expect(component.mensaje).toBe('');
+  }));
+
+  it('debe usar mensaje por defecto en error de carga', () => {
+    adminMock.listarUsuarios.mockReturnValue(
+      throwError(() => ({}))
+    );
+
+    component.cargar();
+
+    expect(component.cargando).toBe(false);
+  });
+
+  it('debe ejecutar búsqueda con debounce', fakeAsync(() => {
+    const spy = jest.spyOn(component, 'cargar');
+
+    component.buscar();
+
+    // aún no debe ejecutarse
+    expect(spy).not.toHaveBeenCalled();
+
+    tick(400);
+
+    expect(spy).toHaveBeenCalled();
+  }));
+
+  it('debe cubrir mensaje por defecto de creación', () => {
+    adminMock.crearUsuario.mockReturnValue(
+      of({ usuario: mockUsuarios[0] })
+    );
+
+    component.crearUsuario();
+
+    expect(component.mensaje).toBe('Usuario creado exitosamente.');
+  });
+
+  it('debe usar mensaje por defecto al crear usuario', () => {
+    adminMock.crearUsuario.mockReturnValue(
+      throwError(() => ({}))
+    );
+
+    component.crearUsuario();
+
+    expect(component.error).toBe('Error al crear usuario.');
+  });
+
+  it('debe asignar telefono vacío si no existe', () => {
+    const userSinTelefono = { ...mockUsuarios[0], telefono: undefined };
+
+    component.abrirEditar(userSinTelefono);
+
+    expect(component.editarDatos.telefono).toBe('');
+  });
+
+  it('debe usar mensaje por defecto al actualizar usuario', () => {
+    adminMock.actualizarUsuario.mockReturnValue(
+      throwError(() => ({}))
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+    component.editarDatos = { nombre: 'X', telefono: '123' };
+
+    component.confirmarEditar();
+
+    expect(component.error).toBe('Error al actualizar usuario.');
+  });
+
+  it('debe cubrir mensaje por defecto de cambio de rol', () => {
+    adminMock.cambiarRol.mockReturnValue(
+      of({ usuario: {} }) 
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+    component.nuevoRol = 'doctor';
+
+    component.confirmarCambioRol();
+
+    expect(component.mensaje).toBe('Rol cambiado exitosamente.');
+  });
+
+  it('debe usar mensaje por defecto al cambiar rol', () => {
+    adminMock.cambiarRol.mockReturnValue(
+      throwError(() => ({}))
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+    component.nuevoRol = 'doctor';
+
+    component.confirmarCambioRol();
+
+    expect(component.error).toBe('Error al cambiar rol.');
+  });
+
+  it('debe cubrir mensaje por defecto al eliminar usuario', () => {
+    adminMock.eliminarUsuario.mockReturnValue(
+      of({})
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+
+    component.confirmarEliminar();
+
+    expect(component.mensaje).toBe('Usuario desactivado.');
+  });
+
+  it('debe usar mensaje por defecto al eliminar usuario', () => {
+    adminMock.eliminarUsuario.mockReturnValue(
+      throwError(() => ({}))
+    );
+
+    component.usuarioSeleccionado = mockUsuarios[0];
+
+    component.confirmarEliminar();
+
+    expect(component.error).toBe('Error al desactivar usuario.');
   });
 });
