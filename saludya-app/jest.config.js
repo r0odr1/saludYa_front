@@ -6,6 +6,7 @@ export default {
   // Archivo de setup — se ejecuta antes de cada suite
   setupFilesAfterEnv: ['<rootDir>/src/setup-jest.ts'],
 
+  // Variables de entorno para tests
   testEnvironment: 'jsdom',
 
   // Alias de módulos — mapea rutas del tsconfig
@@ -47,12 +48,18 @@ export default {
 
   // Transformaciones — jest-preset-angular maneja .ts y .html
   transform: {
-    '^.+\\.(ts|js|mjs|cjs)$': ['jest-preset-angular', {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-      stringifyContentPathRegex: '\\.html$',
-    }],
+    '^.+\\.(ts|js|mjs|cjs)$': [
+      'jest-preset-angular',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        stringifyContentPathRegex: '\\.html$',
+      },
+    ],
   },
 
-  // Variables de entorno para tests
-  testEnvironment: 'jsdom',
+  // Tiempo máximo de ejecución por test
+  testTimeout: 60000,
+
+  // Limitar el número de workers para evitar problemas de recursos
+  maxWorkers: '50%',
 };
