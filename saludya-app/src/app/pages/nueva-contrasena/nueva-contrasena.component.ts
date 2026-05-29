@@ -86,20 +86,18 @@ export class NuevaContrasenaComponent implements OnInit, OnDestroy {
     this.contadorRedireccion = 10;
     this.progresoRedireccion = 0;
 
-    this.ngZone.runOutsideAngular(() => {
-      this.redireccionInterval = setInterval(() => {
-        this.ngZone.run(() => {
-          this.contadorRedireccion--;
-          this.progresoRedireccion = ((10 - this.contadorRedireccion) / 10) * 100;
-          this.cdr.markForCheck();
+    this.redireccionInterval = setInterval(() => {
+      this.contadorRedireccion--;
+      this.progresoRedireccion =
+        ((10 - this.contadorRedireccion) / 10) * 100;
 
-          if (this.contadorRedireccion <= 0) {
-            clearInterval(this.redireccionInterval);
-            this.irAlLogin();
-          }
-        });
-      }, 1000);
-    });
+      this.cdr.markForCheck();
+
+      if (this.contadorRedireccion <= 0) {
+        clearInterval(this.redireccionInterval);
+        this.irAlLogin();
+      }
+    }, 1000);
   }
 
   irAlLogin() {
