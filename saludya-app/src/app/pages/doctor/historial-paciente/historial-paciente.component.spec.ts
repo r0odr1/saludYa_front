@@ -86,7 +86,7 @@ describe('HistorialPacienteComponent', () => {
       expect(routeMock.snapshot.paramMap.get).toHaveBeenCalledWith('pacienteId');
       // Verificamos que se llame al servicio con ese ID
       expect(citaServiceMock.getHistorialPaciente).toHaveBeenCalledWith('123');
-      
+
       // Verificamos datos cargados
       expect(component.historial).toEqual(mockHistorial);
       expect(component.pacienteNombre).toBe('Juan Pérez');
@@ -95,11 +95,23 @@ describe('HistorialPacienteComponent', () => {
 
     it('should handle error when loading historial', () => {
       citaServiceMock.getHistorialPaciente.mockReturnValue(throwError(() => new Error('Error')));
-      
+
       fixture.detectChanges();
 
       expect(component.cargando).toBe(false);
       expect(component.historial).toEqual([]);
+    });
+
+    it('should not assign pacienteNombre when historial is empty', () => {
+      citaServiceMock.getHistorialPaciente.mockReturnValue(
+        of({ historial: [] })
+      );
+
+      fixture.detectChanges();
+
+      expect(component.historial).toEqual([]);
+      expect(component.pacienteNombre).toBe('');
+      expect(component.cargando).toBe(false);
     });
   });
 
