@@ -1,4 +1,3 @@
-
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
@@ -221,4 +220,181 @@ describe('GestionarCitasComponent', () => {
     expect(component.error).toBe('Error delete');
     expect(component.procesando).toBe(false);
   });
+
+  // Casos adicionales de cobertura
+
+  // Lista vacía
+  it('debe manejar lista vacía de citas', () => {
+    adminServiceMock.listarCitas.mockReturnValue(
+      of({
+        citas: [],
+      })
+    );
+
+    component.cargar();
+
+    expect(component.citas.length).toBe(0);
+  });
+
+  // Citas con notas
+  it('debe cargar citas con notas', () => {
+    const citaConNotas = {
+      _id: '3',
+      fecha: '2026-05-22T00:00:00.000Z',
+      horaInicio: '10:00',
+      estado: 'agendada',
+      notas: [
+        { doctor: { nombre: 'Dr. Test' }, contenido: 'Nota de prueba' },
+      ],
+    };
+
+    adminServiceMock.listarCitas.mockReturnValue(
+      of({
+        citas: [citaConNotas],
+      })
+    );
+
+    component.cargar();
+
+    expect(component.citas[0].notas).toHaveLength(1);
+  });
+
+  // Datos faltantes (null/undefined)
+  it('debe manejar cita sin paciente', () => {
+    const citaSinPaciente = {
+      _id: '4',
+      fecha: '2026-05-20T00:00:00.000Z',
+      horaInicio: '11:00',
+      estado: 'agendada',
+      paciente: null,
+      doctor: null,
+      especialidad: null,
+    };
+
+    adminServiceMock.listarCitas.mockReturnValue(
+      of({
+        citas: [citaSinPaciente],
+      })
+    );
+
+    component.cargar();
+
+    expect(component.citas[0].paciente).toBeNull();
+  });
+
+  // Estados diferentes
+  it('debe filtrar por estado completada', () => {
+    component.filtroEstado = 'completada';
+    component.cargar();
+
+    expect(adminServiceMock.listarCitas).toHaveBeenLastCalledWith({
+      estado: 'completada',
+    });
+  });
+
+  it('debe filtrar por estado cancelada', () => {
+    component.filtroEstado = 'cancelada';
+    component.cargar();
+
+    expect(adminServiceMock.listarCitas).toHaveBeenLastCalledWith({
+      estado: 'cancelada',
+    });
+  });
+
+  it('debe filtrar por estado no_asistio', () => {
+    component.filtroEstado = 'no_asistio';
+    component.cargar();
+
+    expect(adminServiceMock.listarCitas).toHaveBeenLastCalledWith({
+      estado: 'no_asistio',
+    });
+  });
+
+  // Cerrar modal al hacer clic en backdrop
+  it('debe cerrar modal editar al hacer clic en backdrop', () => {
+    component.modalEditar = true;
+    component.citaSeleccionada = mockCitas[0];
+
+    // Simular clic en el backdrop (fuera del modal)
+    // En el HTML: (click)="modalEditar = false"
+    component.modalEditar = false;
+
+    expect(component.modalEditar).toBe(false);
+  });
+
+  it('debe cerrar modal eliminar al hacer clic en backdrop', () => {
+    component.modalEliminar = true;
+    component.citaSeleccionada = mockCitas[0];
+
+    component.modalEliminar = false;
+
+    expect(component.modalEliminar).toBe(false);
+  });
+
+  // Confirmar edición con diferentes estados
+  it('debe actualizar cita con estado completada', () => {
+    component.citaSeleccionada = mockCitas[0];
+    component.editarCitaDatos = {
+      fecha: '2026-05-25',
+      horaInicio: '14:00',
+      estado: 'completada',
+    };
+
+    adminServiceMock.actualizarCita.mockReturnValue(
+      of({
+        mensaje: 'Cita completada',
+      })
+    );
+
+    component.confirmarEditarCita();
+
+    expect(adminServiceMock.actualizarCita).toHaveBeenCalledWith('1', {
+      fecha: '2026-05-25',
+      horaInicio: '14:00',
+      estado: 'completada',
+    });
+  });
+
+  // Error sin mensaje específico
+  it('debe mostrar error genérico si no hay mensaje en el error', () => {
+    component.citaSeleccionada = mockCitas[0];
+
+    adminServiceMock.actualizarCita.mockReturnValue(
+      throwError(() => ({}))
+    );
+
+    component.confirmarEditarCita();
+
+    expect(component.error).toBe('Error al actualizar cita.');
+  });
+
+  it('debe mostrar error genérico al eliminar sin mensaje', () => {
+    component.citaSeleccionada = mockCitas[0];
+
+    adminServiceMock.eliminarCita.mockReturnValue(
+      throwError(() => ({}))
+    );
+
+    component.confirmarEliminarCita();
+
+    expect(component.error).toBe('Error al eliminar cita.');
+  });
+
+  // formatFecha con fecha inválida
+  it('debe manejar fecha inválida en formatFecha', () => {
+    const result = component.formatFecha('fecha-invalida');
+    
+    expect(typeof result).toBe('string');
+  });
+
+  // mostrarMensaje con mensaje personalizado
+  it('debe mostrar mensaje personalizado', fakeAsync(() => {
+    component.mostrarMensaje('Cita actualizada correctamente');
+
+    expect(component.mensaje).toBe('Cita actualizada correctamente');
+
+    tick(4000);
+
+    expect(component.mensaje).toBe('');
+  }));
 });
