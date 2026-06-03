@@ -33,7 +33,7 @@ export default {
   // Umbrales mínimos de cobertura (ajusta según necesidad)
   coverageThreshold: {
     global: {
-      branches: 60,
+      branches: 80,
       functions: 80,
       lines: 80,
       statements: 80,
