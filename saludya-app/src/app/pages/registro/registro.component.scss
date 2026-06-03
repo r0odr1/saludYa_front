@@ -71,12 +71,168 @@
   margin-bottom: 32px;
 }
 
-.hint {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-  margin-top: 4px;
+// === Grupos de formulario con validaciones ===
+.form-group {
+  margin-bottom: 1.25rem;
+  position: relative;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text);
+
+    // Asterisco para campos obligatorios
+    .required {
+      color: var(--color-error, #dc3545);
+      margin-left: 2px;
+    }
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--color-border, #ddd);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    transition: all 0.2s ease;
+    color: var(--color-text);
+
+    &:focus {
+      border-color: var(--color-primary);
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb, 0, 123, 255), 0.1);
+    }
+
+    // Estado inválido
+    &.is-invalid {
+      border-color: var(--color-error, #dc3545);
+      background-color: rgba(220, 53, 69, 0.02);
+
+      &:focus {
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+      }
+    }
+
+    &::placeholder {
+      color: var(--color-text-muted, #aaa);
+    }
+
+    &:disabled {
+      background-color: var(--color-bg-light, #f8f9fa);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+
+  // Mensajes de error con animación
+  .invalid-feedback {
+    display: block;
+    color: var(--color-error, #dc3545);
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+    font-weight: 500;
+    animation: slideDown 0.2s ease;
+    line-height: 1.4;
+
+    // Lista de requisitos para contraseña
+    div {
+      margin: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &::before {
+        content: "•";
+        color: var(--color-error, #dc3545);
+      }
+    }
+  }
+
+  // Hints informativos
+  .hint {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+    margin-bottom: 0;
+    line-height: 1.4;
+  }
 }
 
+// === Alertas ===
+.alert {
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeIn 0.2s ease;
+
+  &.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--color-error, #dc3545);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+  }
+
+  &.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--color-success, #28a745);
+    border: 1px solid rgba(40, 167, 69, 0.2);
+  }
+}
+
+// === Botones ===
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+
+  &.btn-primary {
+    background: var(--color-primary);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 0, 123, 255), 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+
+  &.btn-block {
+    width: 100%;
+  }
+
+  &.btn-lg {
+    padding: 1rem;
+    font-size: 1.05rem;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// === Enlaces ===
 .auth-link {
   text-align: center;
   margin-top: 24px;
@@ -86,6 +242,7 @@
   a {
     color: var(--color-primary);
     font-weight: 600;
+    text-decoration: none;
 
     &:hover {
       text-decoration: underline;
@@ -93,6 +250,46 @@
   }
 }
 
+// === Animaciones ===
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// === Indicador de carga (spinner) ===
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// === Responsive ===
 @media (max-width: 768px) {
   .auth-page {
     grid-template-columns: 1fr;
@@ -105,4 +302,29 @@
   .auth-right {
     padding: 32px 20px;
   }
+
+  .auth-form-wrapper {
+    padding: 0 8px;
+  }
+
+  .btn-lg {
+    padding: 0.9rem;
+    font-size: 1rem;
+  }
+}
+
+// === Accesibilidad ===
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// === Focus visible para navegación con teclado ===
+.form-control:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
