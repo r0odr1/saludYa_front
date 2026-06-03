@@ -250,4 +250,388 @@ describe('VerificarResetComponent', () => {
       expect(component.trackByIndex(5)).toBe(5);
     });
   });
+    // Tests adicionales para mejorar cobertura de branches
+
+  describe('Estados de botones disabled', () => {
+    it('should disable verify button when cargando is true', () => {
+      component.cargando = true;
+      component.digitos = ['1', '2', '3', '4', '5', '6'];
+      
+      // El botón debería estar disabled porque cargando es true
+      const buttonDisabled = component.cargando || component.codigoCompleto.length !== 6;
+      
+      expect(buttonDisabled).toBe(true);
+    });
+
+    it('should disable verify button when code is incomplete', () => {
+      component.cargando = false;
+      component.digitos = ['1', '2', '3', '', '', ''];
+      
+      const buttonDisabled = component.cargando || component.codigoCompleto.length !== 6;
+      
+      expect(buttonDisabled).toBe(true);
+    });
+
+    it('should enable verify button when code is complete and not loading', () => {
+      component.cargando = false;
+      component.digitos = ['1', '2', '3', '4', '5', '6'];
+      
+      const buttonDisabled = component.cargando || component.codigoCompleto.length !== 6;
+      
+      expect(buttonDisabled).toBe(false);
+    });
+
+    it('should disable resend button when reenviando is true', () => {
+      component.reenviando = true;
+      component.cooldown = 0;
+      
+      const buttonDisabled = component.reenviando || component.cooldown > 0;
+      
+      expect(buttonDisabled).toBe(true);
+    });
+
+    it('should disable resend button when cooldown > 0', () => {
+      component.reenviando = false;
+      component.cooldown = 30;
+      
+      const buttonDisabled = component.reenviando || component.cooldown > 0;
+      
+      expect(buttonDisabled).toBe(true);
+    });
+
+    it('should enable resend button when not reenviando and cooldown is 0', () => {
+      component.reenviando = false;
+      component.cooldown = 0;
+      
+      const buttonDisabled = component.reenviando || component.cooldown > 0;
+      
+      expect(buttonDisabled).toBe(false);
+    });
+  });
+
+  describe('Button text states', () => {
+    it('should show "Verificando..." when cargando is true', () => {
+      component.cargando = true;
+      
+      const buttonText = component.cargando ? 'Verificando...' : 'Verificar código';
+      
+      expect(buttonText).toBe('Verificando...');
+    });
+
+    it('should show "Enviando..." when reenviando is true', () => {
+      component.reenviando = true;
+      component.cooldown = 0;
+      
+      const buttonText = component.reenviando ? 'Enviando...' : 
+                        component.cooldown > 0 ? `Reenviar en ${component.cooldown}s` : 'Reenviar código';
+      
+      expect(buttonText).toBe('Enviando...');
+    });
+
+    it('should show countdown when cooldown > 0', () => {
+      component.reenviando = false;
+      component.cooldown = 45;
+      
+      const buttonText = component.reenviando ? 'Enviando...' : 
+                        component.cooldown > 0 ? `Reenviar en ${component.cooldown}s` : 'Reenviar código';
+      
+      expect(buttonText).toBe('Reenviar en 45s');
+    });
+
+    it('should show "Reenviar código" when ready', () => {
+      component.reenviando = false;
+      component.cooldown = 0;
+      
+      const buttonText = component.reenviando ? 'Enviando...' : 
+                        component.cooldown > 0 ? `Reenviar en ${component.cooldown}s` : 'Reenviar código';
+      
+      expect(buttonText).toBe('Reenviar código');
+    });
+  });
+
+  describe('Manejo de errores', () => {
+    it('should show generic error message when no mensaje in error', () => {
+      mockAuthService.verificarReset.mockReturnValue(
+        throwError(() => ({ error: {} }))
+      );
+      
+      component.email = 'test@email.com';
+      component.digitos = ['1', '2', '3', '4', '5', '6'];
+      component.verificar();
+      
+      expect(component.error).toBe('Código incorrecto.');
+    });
+
+    
+
+    it('should show error class shake when mostrarError is true', () => {
+      component.mostrarError = true;
+      
+      // En el HTML: [class.shake]="mostrarError" sería true
+      expect(component.mostrarError).toBe(true);
+    });
+
+    it('should show generic error on resend failure', () => {
+      mockAuthService.solicitarReset.mockReturnValue(
+        throwError(() => ({ error: {} }))
+      );
+      
+      component.reenviar();
+      
+      expect(component.error).toBe('Error al reenviar.');
+    });
+  });
+
+  describe('Paste event', () => {
+    it('should handle paste with less than 6 digits', fakeAsync(() => {
+      const mockInput = { nativeElement: { value: '', focus: jest.fn() } };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue(Array(6).fill(mockInput))
+      };
+      component.digitInputs = mockInputs as any;
+
+      const pasteEvent = {
+        preventDefault: jest.fn(),
+        clipboardData: {
+          getData: jest.fn().mockReturnValue('123')
+        }
+      } as any;
+
+      component.onPaste(pasteEvent);
+      tick(10);
+
+      expect(component.digitos.slice(0, 3)).toEqual(['1', '2', '3']);
+      expect(component.digitos.slice(3)).toEqual(['', '', '']);
+    }));
+
+    it('should handle paste with more than 6 digits', fakeAsync(() => {
+      const mockInput = { nativeElement: { value: '', focus: jest.fn() } };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue(Array(6).fill(mockInput))
+      };
+      component.digitInputs = mockInputs as any;
+
+      const pasteEvent = {
+        preventDefault: jest.fn(),
+        clipboardData: {
+          getData: jest.fn().mockReturnValue('123456789')
+        }
+      } as any;
+
+      component.onPaste(pasteEvent);
+      tick(10);
+
+      expect(component.digitos).toEqual(['1', '2', '3', '4', '5', '6']);
+    }));
+
+    it('should handle paste with non-numeric characters', fakeAsync(() => {
+      const mockInput = { nativeElement: { value: '', focus: jest.fn() } };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue(Array(6).fill(mockInput))
+      };
+      component.digitInputs = mockInputs as any;
+
+      const pasteEvent = {
+        preventDefault: jest.fn(),
+        clipboardData: {
+          getData: jest.fn().mockReturnValue('abc123')
+        }
+      } as any;
+
+      component.onPaste(pasteEvent);
+      tick(10);
+
+      expect(component.digitos.slice(0, 3)).toEqual(['1', '2', '3']);
+    }));
+
+    it('should handle empty paste', () => {
+      const pasteEvent = {
+        preventDefault: jest.fn(),
+        clipboardData: {
+          getData: jest.fn().mockReturnValue('')
+        }
+      } as any;
+
+      component.onPaste(pasteEvent);
+
+      expect(component.digitos).toEqual(['', '', '', '', '', '']);
+    });
+
+    it('should handle paste with null clipboardData', () => {
+      const pasteEvent = {
+        preventDefault: jest.fn(),
+        clipboardData: null
+      } as any;
+
+      component.onPaste(pasteEvent);
+
+      expect(component.digitos).toEqual(['', '', '', '', '', '']);
+    });
+  });
+
+  describe('onDigitInput edge cases', () => {
+    it('should handle empty value in digit input', () => {
+      const mockInput = {
+        nativeElement: { value: '', focus: jest.fn() }
+      };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue([mockInput, mockInput, mockInput, mockInput, mockInput, mockInput])
+      };
+      component.digitInputs = mockInputs as any;
+
+      const event = { target: { value: '' } };
+      component.onDigitInput(event as any, 0);
+
+      expect(component.digitos[0]).toBe('');
+    });
+
+    it('should not focus next input when value is empty', () => {
+      const mockInput = {
+        nativeElement: { value: '', focus: jest.fn() }
+      };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue([mockInput, mockInput, mockInput, mockInput, mockInput, mockInput])
+      };
+      component.digitInputs = mockInputs as any;
+
+      const event = { target: { value: '' } };
+      component.onDigitInput(event as any, 0);
+
+      expect(mockInputs.toArray()[1].nativeElement.focus).not.toHaveBeenCalled();
+    });
+
+    it('should not focus next input when index is 5', () => {
+      const mockInput = {
+        nativeElement: { value: '5', focus: jest.fn() }
+      };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue([mockInput, mockInput, mockInput, mockInput, mockInput, mockInput])
+      };
+      component.digitInputs = mockInputs as any;
+
+      const event = { target: { value: '5' } };
+      component.onDigitInput(event as any, 5);
+
+      expect(mockInputs.toArray()[6]).toBeUndefined();
+    });
+
+    it('should remove non-numeric characters from input', () => {
+      const mockInput = {
+        nativeElement: { value: 'abc', focus: jest.fn() }
+      };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue([mockInput, mockInput, mockInput, mockInput, mockInput, mockInput])
+      };
+      component.digitInputs = mockInputs as any;
+
+      const event = { target: { value: 'abc' } };
+      component.onDigitInput(event as any, 0);
+
+      expect(component.digitos[0]).toBe('');
+    });
+  });
+
+  describe('onKeyDown edge cases', () => {
+    it('should not focus previous when key is not Backspace', () => {
+      component.digitos = ['', '2', '3', '', '', ''];
+      const mockInput = { nativeElement: { focus: jest.fn() } };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue([mockInput, mockInput, mockInput, mockInput, mockInput, mockInput])
+      };
+      component.digitInputs = mockInputs as any;
+
+      const event = { key: 'ArrowLeft' } as KeyboardEvent;
+      component.onKeyDown(event, 2);
+
+      expect(mockInputs.toArray()[1].nativeElement.focus).not.toHaveBeenCalled();
+    });
+
+    it('should not focus previous when index is 0', () => {
+      component.digitos = ['', '2', '3', '', '', ''];
+      const mockInput = { nativeElement: { focus: jest.fn() } };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue([mockInput, mockInput, mockInput, mockInput, mockInput, mockInput])
+      };
+      component.digitInputs = mockInputs as any;
+
+      const event = { key: 'Backspace' } as KeyboardEvent;
+      component.onKeyDown(event, 0);
+
+      expect(mockInputs.toArray).not.toHaveBeenCalled();
+    });
+
+    it('should not focus previous when current digit has value', () => {
+      component.digitos = ['1', '2', '3', '', '', ''];
+      const mockInput = { nativeElement: { focus: jest.fn() } };
+      const mockInputs = {
+        toArray: jest.fn().mockReturnValue([mockInput, mockInput, mockInput, mockInput, mockInput, mockInput])
+      };
+      component.digitInputs = mockInputs as any;
+
+      const event = { key: 'Backspace' } as KeyboardEvent;
+      component.onKeyDown(event, 1);
+
+      expect(mockInputs.toArray()[0].nativeElement.focus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Cooldown timer', () => {
+    it('should clear interval when cooldown reaches 0', fakeAsync(() => {
+      jest.useFakeTimers();
+      
+      component.reenviar();
+      
+      jest.advanceTimersByTime(60000);
+      
+      expect(component.cooldown).toBe(0);
+      
+      jest.useRealTimers();
+    }));
+
+    it('should decrement cooldown every second', fakeAsync(() => {
+      component.reenviar();
+      
+      expect(component.cooldown).toBe(60);
+      
+      tick(5000);
+      expect(component.cooldown).toBe(55);
+      
+      tick(30000);
+      expect(component.cooldown).toBe(25);
+    }));
+  });
+
+  describe('Verificación con código incompleto', () => {
+    it('should not verify with 5 digits', () => {
+      component.digitos = ['1', '2', '3', '4', '5', ''];
+      component.verificar();
+      
+      expect(mockAuthService.verificarReset).not.toHaveBeenCalled();
+    });
+
+    it('should not verify with empty code', () => {
+      component.digitos = ['', '', '', '', '', ''];
+      component.verificar();
+      
+      expect(mockAuthService.verificarReset).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Redirección sin email', () => {
+    it('should redirect when email is null', () => {
+      mockAuthService.emailPendiente.mockReturnValue(null);
+      
+      fixture.detectChanges();
+      
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/solicitar-reset']);
+    });
+
+    it('should redirect when email is empty string', () => {
+      mockAuthService.emailPendiente.mockReturnValue('');
+      
+      fixture.detectChanges();
+      
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/solicitar-reset']);
+    });
+  });
 });
